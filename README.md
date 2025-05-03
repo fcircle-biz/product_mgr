@@ -15,9 +15,11 @@
 
 ## システム要件
 
-- **フロントエンド**: HTML, CSS, JavaScript
-- **バックエンド**: 未定（実装時に決定）
+- **フロントエンド**: HTML, CSS, JavaScript, Bootstrap 5, Thymeleaf, Chart.js
+- **バックエンド**: Java 17, Spring Boot 3.2, Spring Security, Spring Data JDBC
 - **データベース**: PostgreSQL
+- **ビルドツール**: Maven
+- **コンテナ化**: Docker, Docker Compose
 
 ## ドキュメント
 
@@ -45,19 +47,104 @@
 
 ## 開発環境のセットアップ
 
+### 前提条件
+
+- Docker と Docker Compose がインストールされていること
+- Java 17 (開発用、Dockerを使用する場合は不要)
+- Maven (開発用、Dockerを使用する場合は不要)
+
+### Dockerを使用したセットアップ
+
 ```bash
 # リポジトリのクローン
 git clone https://github.com/yourusername/product_mgr.git
 cd product_mgr
 
-# 開発環境のセットアップ（未定）
-# TODO: 実装時に更新
+# Docker Composeでアプリケーションを起動
+docker compose up -d
+
+# ブラウザで http://localhost:8080 にアクセス
+# ログイン: admin / admin
+```
+
+### ローカル開発環境でのセットアップ
+
+```bash
+# リポジトリのクローン
+git clone https://github.com/yourusername/product_mgr.git
+cd product_mgr
+
+# PostgreSQLのみDockerで起動
+docker compose up -d postgres
+
+# Mavenでビルドして実行
+./mvnw spring-boot:run
+
+# または
+mvn spring-boot:run
+```
+
+## 主要機能の使い方
+
+### 商品管理
+
+- 商品一覧: `/products` - 登録されている全商品の一覧を表示・検索できます
+- 商品登録: `/products/create` - 新規商品を登録します
+- 商品詳細: `/products/{id}` - 商品の詳細情報を表示します
+
+### 在庫管理
+
+- 在庫一覧: `/inventory` - 全商品の在庫状況を確認できます
+- 入庫処理: `/inventory/add` - 商品の入庫処理を行います
+- 出庫処理: `/inventory/subtract` - 商品の出庫処理を行います
+- 在庫履歴: `/inventory/history/{productId}` - 特定商品の入出庫履歴を表示します
+
+### レポート機能
+
+- レポートダッシュボード: `/reports` - 各種レポートメニューを表示します
+- 日次レポート: `/reports/daily` - 日単位の入出庫状況を表示します
+- 月次レポート: `/reports/monthly` - 月単位の入出庫状況を表示します
+- 商品レポート: `/reports/product/{id}` - 商品ごとの在庫推移を表示します
+- 在庫警告: `/reports/stock-warning` - 在庫切れ・在庫少の商品を表示します
+- カテゴリ分布: `/reports/category-distribution` - カテゴリ別の商品分布を表示します
+
+## データベース構造
+
+システムは以下の主要テーブルで構成されています：
+
+- **products**: 商品情報（商品名、説明、価格、カテゴリなど）
+- **categories**: 商品カテゴリ
+- **inventory_history**: 在庫の入出庫履歴
+- **system_settings**: システム設定値
+
+## プロジェクト構造
+
+```
+product_mgr/
+├── src/main/
+│   ├── java/com/example/productmgr/
+│   │   ├── config/          # アプリケーション設定
+│   │   ├── controller/      # MVCコントローラー
+│   │   ├── model/           # データモデル
+│   │   ├── repository/      # データアクセスレイヤー
+│   │   ├── service/         # ビジネスロジック
+│   │   └── ProductMgrApplication.java
+│   └── resources/
+│       ├── db/migration/    # Flyway DBマイグレーション
+│       ├── static/          # 静的リソース
+│       ├── templates/       # Thymeleafテンプレート
+│       └── application.yml  # アプリケーション設定
+└── pom.xml                  # Mavenプロジェクト設定
 ```
 
 ## ライセンス
 
-当プロジェクトのライセンスは未定です。
+当プロジェクトはMITライセンスの下で提供されています。
 
 ## 貢献
 
-貢献に関するガイドラインは、実装フェーズで追加される予定です。
+1. このリポジトリをフォークします
+2. 新しいブランチを作成します: `git checkout -b my-new-feature`
+3. 変更をコミットします: `git commit -am 'Add some feature'`
+4. ブランチにプッシュします: `git push origin my-new-feature`
+5. プルリクエストを送信します
