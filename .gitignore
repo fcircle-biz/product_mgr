@@ -1,1 +1,62 @@
-**/.claude/settings.local.json
+# Maven
+target/
+*.jar
+*.war
+*.ear
+*.class
+
+# Eclipse
+.project
+.classpath
+.settings/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# NetBeans
+nbproject/
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# VS Code
+.vscode/
+.code-workspace
+
+# Spring Boot
+.spring-boot-devtools.restart.trigger
+
+# Logs
+logs/
+*.log
+log/
+
+# OS files
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Application properties with sensitive data
+application-dev.properties
+application-prod.properties
+
+# Package files
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Database
+*.db
+*.sqlite
