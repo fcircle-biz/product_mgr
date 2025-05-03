@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>メインメニュー画面仕様書</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+        }
+        h2 {
+            margin-top: 30px;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 5px;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .wireframe {
+            border: 1px solid #ccc;
+            padding: 20px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>メインメニュー画面仕様書</h1>
+    <p>最終更新日: 2025年5月4日</p>
+
+    <h2>1. 画面概要</h2>
+    <p>システムの主要機能にアクセスするためのメインメニュー画面です。各機能へのリンクが表示されます。</p>
+
+    <h2>2. 画面レイアウト</h2>
+    <div class="wireframe">
+        <h3>ワイヤーフレーム</h3>
+        <pre>
++-----------------------------------------------+
+|  商品管理システム                 ログアウト  |
++-----------------------------------------------+
+|                                               |
+|   +-------------------+  +----------------+   |
+|   |                   |  |                |   |
+|   |    商品管理       |  |    在庫管理    |   |
+|   |                   |  |                |   |
+|   +-------------------+  +----------------+   |
+|                                               |
+|   +-------------------+  +----------------+   |
+|   |                   |  |                |   |
+|   |    レポート       |  |    設定        |   |
+|   |                   |  |                |   |
+|   +-------------------+  +----------------+   |
+|                                               |
+|                                               |
+|                                               |
+|  ユーザー: [ユーザー名]    役割: [役割]       |
+|                                               |
++-----------------------------------------------+
+        </pre>
+    </div>
+
+    <h2>3. 表示項目</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>項目名</th>
+                <th>表示内容</th>
+                <th>備考</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>ユーザー</td>
+                <td>ログイン中のユーザー名</td>
+                <td>現在のセッション情報から取得</td>
+            </tr>
+            <tr>
+                <td>役割</td>
+                <td>ユーザーの役割（管理者/一般ユーザー）</td>
+                <td>現在のセッション情報から取得</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>4. メニュー項目</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>メニュー名</th>
+                <th>遷移先</th>
+                <th>アクセス権限</th>
+                <th>備考</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>商品管理</td>
+                <td>商品一覧画面</td>
+                <td>全ユーザー</td>
+                <td>商品の登録、閲覧、編集、削除を行う</td>
+            </tr>
+            <tr>
+                <td>在庫管理</td>
+                <td>在庫管理画面</td>
+                <td>全ユーザー</td>
+                <td>在庫の入出庫、在庫管理を行う</td>
+            </tr>
+            <tr>
+                <td>レポート</td>
+                <td>レポート画面</td>
+                <td>全ユーザー</td>
+                <td>各種帳票、分析レポートを表示</td>
+            </tr>
+            <tr>
+                <td>設定</td>
+                <td>設定画面</td>
+                <td>管理者のみ</td>
+                <td>一般ユーザーには表示されない</td>
+            </tr>
+            <tr>
+                <td>ログアウト</td>
+                <td>ログイン画面</td>
+                <td>全ユーザー</td>
+                <td>ヘッダー部分に配置</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>5. ボタン/リンク</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>名称</th>
+                <th>処理内容</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>各メニュー項目</td>
+                <td>対応する画面へ遷移する</td>
+            </tr>
+            <tr>
+                <td>ログアウト</td>
+                <td>セッションを終了し、ログイン画面へ遷移する</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>6. 特記事項</h2>
+    <ul>
+        <li>ユーザーの権限に応じて、表示されるメニュー項目が変更される</li>
+        <li>管理者ユーザーはすべてのメニューにアクセス可能</li>
+        <li>一般ユーザーは「設定」メニューにアクセスできない</li>
+    </ul>
+</body>
+</html>
