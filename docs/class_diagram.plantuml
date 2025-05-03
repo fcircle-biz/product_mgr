@@ -1,0 +1,250 @@
+@startuml ProductManagerClassDiagram
+
+' スタイル設定
+skinparam classAttributeIconSize 0
+skinparam BackgroundColor White
+skinparam ClassBackgroundColor LightBlue
+skinparam ClassBorderColor DarkBlue
+skinparam ControllerBackgroundColor LightGreen
+skinparam ServiceBackgroundColor LightYellow
+skinparam RepositoryBackgroundColor LightPink
+
+title 商品管理システム クラス図
+
+package "Model" {
+  class Product {
+    - id: Long
+    - name: String
+    - janCode: String
+    - categoryId: Long
+    - price: BigDecimal
+    - stockQuantity: Integer
+    - stockUnit: String
+    - status: String
+    - description: String
+    - createdAt: LocalDateTime
+    - updatedAt: LocalDateTime
+    - category: Category
+  }
+  
+  class Category {
+    - id: Long
+    - name: String
+    - description: String
+    - createdAt: LocalDateTime
+    - updatedAt: LocalDateTime
+  }
+  
+  class InventoryHistory {
+    - id: Long
+    - productId: Long
+    - quantityChange: Integer
+    - reason: String
+    - operatedBy: Long
+    - createdAt: LocalDateTime
+    - product: Product
+    - user: User
+    + getType(): String
+    + getQuantity(): Integer
+  }
+  
+  class User {
+    - id: Long
+    - username: String
+    - password: String
+    - fullName: String
+    - role: String
+    - enabled: boolean
+    - createdAt: LocalDateTime
+    - updatedAt: LocalDateTime
+  }
+  
+  class SystemSetting {
+    - id: Long
+    - key: String
+    - value: String
+    - description: String
+    - createdAt: LocalDateTime
+    - updatedAt: LocalDateTime
+  }
+}
+
+package "Repository" {
+  interface ProductRepository {
+    + findById(id: Long): Optional<Product>
+    + findAll(): List<Product>
+    + findOutOfStock(): List<Product>
+    + findLowStock(): List<Product>
+    + save(product: Product): Product
+    + deleteById(id: Long): void
+  }
+  
+  interface CategoryRepository {
+    + findById(id: Long): Optional<Category>
+    + findAllSorted(): List<Category>
+    + save(category: Category): Category
+    + deleteById(id: Long): void
+  }
+  
+  interface InventoryHistoryRepository {
+    + findByProductId(productId: Long): List<InventoryHistory>
+    + findLatestByProductId(productId: Long, limit: int): List<InventoryHistory>
+    + findByDateRange(startDate: LocalDateTime, endDate: LocalDateTime): List<InventoryHistory>
+    + findByType(type: String): List<InventoryHistory>
+    + save(history: InventoryHistory): InventoryHistory
+  }
+  
+  interface UserRepository {
+    + findById(id: Long): Optional<User>
+    + findByUsername(username: String): Optional<User>
+    + save(user: User): User
+  }
+  
+  interface SystemSettingRepository {
+    + findByKey(key: String): Optional<SystemSetting>
+    + findAll(): List<SystemSetting>
+    + save(setting: SystemSetting): SystemSetting
+  }
+}
+
+package "Service" {
+  class ProductService {
+    - productRepository: ProductRepository
+    - categoryRepository: CategoryRepository
+    + findById(id: Long): Optional<Product>
+    + findAll(): List<Product>
+    + findOutOfStock(): List<Product>
+    + findLowStock(): List<Product>
+    + save(product: Product): Product
+    + deleteById(id: Long): void
+  }
+  
+  class CategoryService {
+    - categoryRepository: CategoryRepository
+    + findById(id: Long): Optional<Category>
+    + findAllSorted(): List<Category>
+    + save(category: Category): Category
+    + deleteById(id: Long): void
+  }
+  
+  class InventoryService {
+    - inventoryHistoryRepository: InventoryHistoryRepository
+    - productService: ProductService
+    + findByProductId(productId: Long): List<InventoryHistory>
+    + findByDateRange(startDate: LocalDateTime, endDate: LocalDateTime): List<InventoryHistory>
+    + findByType(type: String): List<InventoryHistory>
+    + addInventoryHistory(history: InventoryHistory): InventoryHistory
+  }
+  
+  class UserService {
+    - userRepository: UserRepository
+    + findById(id: Long): Optional<User>
+    + findByUsername(username: String): Optional<User>
+    + save(user: User): User
+  }
+  
+  class SystemSettingService {
+    - systemSettingRepository: SystemSettingRepository
+    + findByKey(key: String): Optional<SystemSetting>
+    + getValue(key: String): String
+    + getValue(key: String, defaultValue: String): String
+    + findAll(): List<SystemSetting>
+    + save(setting: SystemSetting): SystemSetting
+  }
+}
+
+package "Controller" {
+  class ProductController {
+    - productService: ProductService
+    - categoryService: CategoryService
+    + list(model: Model): String
+    + detail(id: Long, model: Model): String
+    + createForm(model: Model): String
+    + create(product: Product, redirectAttributes: RedirectAttributes): String
+    + editForm(id: Long, model: Model): String
+    + update(id: Long, product: Product, redirectAttributes: RedirectAttributes): String
+    + delete(id: Long, redirectAttributes: RedirectAttributes): String
+  }
+  
+  class CategoryController {
+    - categoryService: CategoryService
+    + list(model: Model): String
+    + createForm(model: Model): String
+    + create(category: Category, redirectAttributes: RedirectAttributes): String
+    + editForm(id: Long, model: Model): String
+    + update(id: Long, category: Category, redirectAttributes: RedirectAttributes): String
+    + delete(id: Long, redirectAttributes: RedirectAttributes): String
+  }
+  
+  class InventoryController {
+    - inventoryService: InventoryService
+    - productService: ProductService
+    + listInventory(model: Model): String
+    + addInventoryForm(model: Model): String
+    + addInventory(history: InventoryHistory, redirectAttributes: RedirectAttributes): String
+    + subtractInventoryForm(model: Model): String
+    + subtractInventory(history: InventoryHistory, redirectAttributes: RedirectAttributes): String
+    + viewHistory(productId: Long, model: Model): String
+  }
+  
+  class ReportController {
+    - productService: ProductService
+    - categoryService: CategoryService
+    - inventoryService: InventoryService
+    - systemSettingService: SystemSettingService
+    + reportDashboard(model: Model): String
+    + stockWarningReport(model: Model): String
+    + inventorySummaryReport(startDate: LocalDate, endDate: LocalDate, model: Model): String
+    + categoryDistributionReport(model: Model): String
+    + dailyReport(date: LocalDate, model: Model): String
+    + monthlyReport(yearMonth: String, model: Model): String
+    + productReport(id: Long, startDate: LocalDate, endDate: LocalDate, model: Model): String
+    + inventoryTurnoverReport(startDate: LocalDate, endDate: LocalDate, model: Model): String
+    + exportStockWarningReport(response: HttpServletResponse): void
+    + exportMonthlyReport(yearMonth: String, response: HttpServletResponse): void
+    + exportCategoryDistribution(response: HttpServletResponse): void
+    + exportInventoryTurnoverReport(startDate: LocalDate, endDate: LocalDate, response: HttpServletResponse): void
+  }
+  
+  class SettingsController {
+    - systemSettingService: SystemSettingService
+    + index(model: Model): String
+    + update(settings: List<SystemSetting>, redirectAttributes: RedirectAttributes): String
+  }
+  
+  class HomeController {
+    + index(): String
+    + mainMenu(): String
+  }
+  
+  class LoginController {
+    + loginPage(): String
+    + loginError(model: Model): String
+  }
+}
+
+' リレーションシップ
+Product --> Category : belongs to
+InventoryHistory --> Product : refers to
+InventoryHistory --> User : operated by
+
+ProductService ..> ProductRepository : uses
+ProductService ..> CategoryRepository : uses
+CategoryService ..> CategoryRepository : uses
+InventoryService ..> InventoryHistoryRepository : uses
+InventoryService ..> ProductService : uses
+UserService ..> UserRepository : uses
+SystemSettingService ..> SystemSettingRepository : uses
+
+ProductController ..> ProductService : uses
+ProductController ..> CategoryService : uses
+CategoryController ..> CategoryService : uses
+InventoryController ..> InventoryService : uses
+InventoryController ..> ProductService : uses
+ReportController ..> ProductService : uses
+ReportController ..> CategoryService : uses
+ReportController ..> InventoryService : uses
+ReportController ..> SystemSettingService : uses
+SettingsController ..> SystemSettingService : uses
+
+@enduml
