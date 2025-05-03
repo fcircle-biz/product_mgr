@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="fragments/layout :: head('在庫回転率レポート')">
+    <meta charset="UTF-8">
+    <title>在庫回転率レポート</title>
+</head>
+
+<body>
+    <nav th:replace="fragments/layout :: navbar"></nav>
+    
+    <div th:replace="fragments/layout :: messages"></div>
+    
+    <div th:replace="fragments/layout :: breadcrumb(${
+        {{'name': 'レポート', 'url': '/reports'}, {'name': '在庫回転率レポート', 'url': '/reports/inventory-turnover'}}
+    })"></div>
+    
+    <div class="container mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>在庫回転率レポート</h2>
+            <div>
+                <a th:href="@{/reports/export/inventory-turnover(startDate=${startDate},endDate=${endDate})}" class="btn btn-success me-2">
+                    <i class="bi bi-file-earmark-excel"></i> CSVエクスポート
+                </a>
+                <a th:href="@{/reports}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> レポート一覧に戻る
+                </a>
+            </div>
+        </div>
+        
+        <!-- 期間選択 -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">期間選択</h5>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/reports/inventory-turnover}" method="get" class="row g-3 align-items-end">
+                    <div class="col-md-4">
+                        <label for="startDate" class="form-label">開始日</label>
+                        <input type="date" class="form-control" id="startDate" name="startDate" 
+                               th:value="${startDate}" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="endDate" class="form-label">終了日</label>
+                        <input type="date" class="form-control" id="endDate" name="endDate" 
+                               th:value="${endDate}" required>
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-search"></i> 表示
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- 説明カード -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">在庫回転率について</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <p>在庫回転率は、一定期間内に在庫がどれだけ売れたかを示す指標です。</p>
+                        <ul>
+                            <li><strong>在庫回転率</strong>: 出庫数 ÷ 平均在庫数</li>
+                            <li><strong>年間換算回転率</strong>: 在庫回転率 × (365日 ÷ 分析期間日数)</li>
+                            <li><strong>在庫回転日数</strong>: 平均在庫数 ÷ (出庫数 ÷ 分析期間日数)</li>
+                        </ul>
+                        <p>回転率が高い商品ほど在庫効率が良く、回転日数が短い商品ほど在庫が早く売れていることを示します。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 在庫回転率サマリー -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0" th:text="${startDate + ' 〜 ' + endDate + ' の在庫回転率分析'}">期間の在庫回転率分析</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> 全<span th:text="${totalProducts}">0</span>商品の在庫回転率を分析しています。
+                </div>
+                
+                <!-- 上位5商品の在庫回転率グラフ -->
+                <div class="mb-4">
+                    <h5>上位5商品の在庫回転率（年間換算）</h5>
+                    <canvas id="topTurnoverChart" height="300"></canvas>
+                </div>
+                
+                <!-- 在庫回転率分布グラフ -->
+                <div class="mb-4">
+                    <h5>在庫回転率の分布</h5>
+                    <canvas id="turnoverDistributionChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 在庫回転率テーブル -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">商品別在庫回転率</h5>
+                <span class="badge bg-light text-dark" th:text="${'全 ' + turnoverData.size() + ' 件'}">全 0 件</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>商品ID</th>
+                                <th>商品名</th>
+                                <th>カテゴリ</th>
+                                <th class="text-end">初期在庫</th>
+                                <th class="text-end">現在在庫</th>
+                                <th class="text-end">平均在庫</th>
+                                <th class="text-end">出庫数</th>
+                                <th class="text-end">在庫回転率</th>
+                                <th class="text-end">年間換算回転率</th>
+                                <th class="text-end">在庫回転日数</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="data : ${turnoverData}">
+                                <td th:text="${data.product.id}">1</td>
+                                <td>
+                                    <a th:href="@{/reports/product/{id}(id=${data.product.id},startDate=${startDate},endDate=${endDate})}" 
+                                       th:text="${data.product.name}">商品名</a>
+                                </td>
+                                <td th:text="${data.product.category != null ? data.product.category.name : '未分類'}">カテゴリ</td>
+                                <td class="text-end" th:text="${data.initialStock}">10</td>
+                                <td class="text-end" th:text="${data.currentStock}">15</td>
+                                <td class="text-end" th:text="${#numbers.formatDecimal(data.averageStock, 1, 1)}">12.5</td>
+                                <td class="text-end" th:text="${data.totalOutbound}">25</td>
+                                <td class="text-end" th:text="${#numbers.formatDecimal(data.turnoverRate, 1, 2)}">2.0</td>
+                                <td class="text-end" th:text="${#numbers.formatDecimal(data.annualizedTurnoverRate, 1, 2)}">8.1</td>
+                                <td class="text-end" th:text="${#numbers.formatDecimal(data.turnoverDays, 1, 1)}">45.0</td>
+                            </tr>
+                            <tr th:if="${turnoverData.isEmpty()}">
+                                <td colspan="10" class="text-center">データがありません</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer th:replace="fragments/layout :: footer"></footer>
+    
+    <!-- Chart.js の読み込み -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+            // 上位5商品の在庫回転率データ
+            const turnoverData = /*[[${turnoverData}]]*/ [];
+            
+            // データを上位5件に制限
+            const top5Data = turnoverData.slice(0, 5);
+            
+            // 商品名の配列
+            const productNames = top5Data.map(data => data.product.name);
+            
+            // 年間換算回転率の配列
+            const annualizedTurnoverRates = top5Data.map(data => data.annualizedTurnoverRate);
+            
+            // 上位5商品の在庫回転率グラフ
+            new Chart(document.getElementById('topTurnoverChart'), {
+                type: 'bar',
+                data: {
+                    labels: productNames,
+                    datasets: [{
+                        label: '年間換算回転率',
+                        data: annualizedTurnoverRates,
+                        backgroundColor: 'rgba(23, 162, 184, 0.8)',
+                        borderColor: 'rgba(23, 162, 184, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: '回転率'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // 在庫回転率分布の計算
+            const turnoverDistribution = {
+                '0〜1回': 0,
+                '1〜3回': 0,
+                '3〜6回': 0,
+                '6〜12回': 0,
+                '12回以上': 0
+            };
+            
+            turnoverData.forEach(data => {
+                const rate = data.annualizedTurnoverRate;
+                if (rate < 1) {
+                    turnoverDistribution['0〜1回']++;
+                } else if (rate < 3) {
+                    turnoverDistribution['1〜3回']++;
+                } else if (rate < 6) {
+                    turnoverDistribution['3〜6回']++;
+                } else if (rate < 12) {
+                    turnoverDistribution['6〜12回']++;
+                } else {
+                    turnoverDistribution['12回以上']++;
+                }
+            });
+            
+            // 在庫回転率分布グラフ
+            new Chart(document.getElementById('turnoverDistributionChart'), {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(turnoverDistribution),
+                    datasets: [{
+                        data: Object.values(turnoverDistribution),
+                        backgroundColor: [
+                            'rgba(220, 53, 69, 0.8)',
+                            'rgba(255, 193, 7, 0.8)',
+                            'rgba(40, 167, 69, 0.8)',
+                            'rgba(0, 123, 255, 0.8)',
+                            'rgba(23, 162, 184, 0.8)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'right'
+                        },
+                        title: {
+                            display: true,
+                            text: '年間換算回転率の分布'
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

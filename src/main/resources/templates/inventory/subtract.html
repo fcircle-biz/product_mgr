@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="fragments/layout :: head('出庫登録')">
+    <meta charset="UTF-8">
+    <title>出庫登録</title>
+</head>
+
+<body>
+    <nav th:replace="fragments/layout :: navbar"></nav>
+    
+    <div th:replace="fragments/layout :: messages"></div>
+    
+    <div th:replace="fragments/layout :: breadcrumb(${
+        {{'name': '在庫管理', 'url': '/inventory'}, {'name': '出庫登録', 'url': '/inventory/subtract'}}
+    })"></div>
+    
+    <div class="container mb-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow">
+                    <div class="card-header bg-danger text-white">
+                        <h4 class="mb-0">出庫登録</h4>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/inventory/process}" th:object="${inventoryHistory}" method="post">
+                            <input type="hidden" th:field="*{type}" value="出庫" />
+                            
+                            <div class="mb-3">
+                                <label for="productId" class="form-label">商品 <span class="text-danger">*</span></label>
+                                <select class="form-select" id="productId" th:field="*{productId}" required>
+                                    <option value="">商品を選択してください</option>
+                                    <option th:each="product : ${products}" 
+                                            th:value="${product.id}" 
+                                            th:text="${product.name + ' (' + product.stockQuantity + product.stockUnit + '在庫)'}"
+                                            th:data-stock="${product.stockQuantity}">
+                                        商品名 (10個在庫)
+                                    </option>
+                                </select>
+                                <div class="form-text">出庫する商品を選択してください</div>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('productId')}" th:errors="*{productId}">
+                                    商品を選択してください
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="currentStock" class="form-label">現在庫数</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="currentStock" readonly>
+                                    <span class="input-group-text">個</span>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="quantity" class="form-label">数量 <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="quantity" th:field="*{quantity}" min="1" required>
+                                    <span class="input-group-text">個</span>
+                                </div>
+                                <div class="form-text">出庫する数量を入力してください（在庫数以下）</div>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('quantity')}" th:errors="*{quantity}">
+                                    1以上の数値を入力してください
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="reason" class="form-label">理由 <span class="text-danger">*</span></label>
+                                <select class="form-select" id="reason" th:field="*{reason}" required>
+                                    <option value="">選択してください</option>
+                                    <option value="販売">販売</option>
+                                    <option value="不良品">不良品</option>
+                                    <option value="棚卸調整">棚卸調整</option>
+                                    <option value="内部使用">内部使用</option>
+                                    <option value="その他">その他</option>
+                                </select>
+                                <div class="form-text">出庫理由を選択してください</div>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('reason')}" th:errors="*{reason}">
+                                    理由を選択してください
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="note" class="form-label">備考</label>
+                                <textarea class="form-control" id="note" th:field="*{note}" rows="3"></textarea>
+                                <div class="form-text">補足情報があれば入力してください</div>
+                            </div>
+                            
+                            <div class="alert alert-warning">
+                                <i class="bi bi-exclamation-triangle"></i> 出庫処理を行うと商品の在庫数が自動的に減少します。在庫数を超える出庫はできません。
+                            </div>
+                            
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a th:href="@{/inventory}" class="btn btn-secondary me-md-2">
+                                    <i class="bi bi-arrow-left"></i> キャンセル
+                                </a>
+                                <button type="submit" class="btn btn-danger" id="submitButton">
+                                    <i class="bi bi-check-circle"></i> 出庫登録
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer th:replace="fragments/layout :: footer"></footer>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 商品選択時の処理
+            const productSelect = document.getElementById('productId');
+            const currentStockInput = document.getElementById('currentStock');
+            const quantityInput = document.getElementById('quantity');
+            const submitButton = document.getElementById('submitButton');
+            
+            // 初期状態で在庫数を表示
+            updateStockDisplay();
+            
+            // 商品変更時の処理
+            productSelect.addEventListener('change', function() {
+                updateStockDisplay();
+            });
+            
+            // 数量入力時の処理
+            quantityInput.addEventListener('input', function() {
+                validateQuantity();
+            });
+            
+            // 在庫数表示の更新
+            function updateStockDisplay() {
+                const selectedOption = productSelect.options[productSelect.selectedIndex];
+                if (selectedOption && selectedOption.value) {
+                    const stockQuantity = selectedOption.getAttribute('data-stock');
+                    currentStockInput.value = stockQuantity;
+                    
+                    // 最大値を設定
+                    quantityInput.setAttribute('max', stockQuantity);
+                    
+                    validateQuantity();
+                } else {
+                    currentStockInput.value = "";
+                    quantityInput.removeAttribute('max');
+                }
+            }
+            
+            // 数量のバリデーション
+            function validateQuantity() {
+                const stockQuantity = parseInt(currentStockInput.value) || 0;
+                const quantity = parseInt(quantityInput.value) || 0;
+                
+                if (quantity > stockQuantity) {
+                    quantityInput.setCustomValidity('在庫数以下の数値を入力してください');
+                    submitButton.disabled = true;
+                } else if (quantity <= 0) {
+                    quantityInput.setCustomValidity('1以上の数値を入力してください');
+                    submitButton.disabled = true;
+                } else {
+                    quantityInput.setCustomValidity('');
+                    submitButton.disabled = false;
+                }
+            }
+            
+            // フォームのバリデーション
+            const form = document.querySelector('form');
+            form.addEventListener('submit', function(event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                
+                // 追加のバリデーション
+                const stockQuantity = parseInt(currentStockInput.value) || 0;
+                const quantity = parseInt(quantityInput.value) || 0;
+                
+                if (quantity > stockQuantity) {
+                    event.preventDefault();
+                    quantityInput.setCustomValidity('在庫数以下の数値を入力してください');
+                }
+                
+                form.classList.add('was-validated');
+            }, false);
+        });
+    </script>
+</body>
+</html>

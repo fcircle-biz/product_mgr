@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="fragments/layout :: head('在庫履歴')">
+    <meta charset="UTF-8">
+    <title>在庫履歴</title>
+</head>
+
+<body>
+    <nav th:replace="fragments/layout :: navbar"></nav>
+    
+    <div th:replace="fragments/layout :: messages"></div>
+    
+    <div th:replace="fragments/layout :: breadcrumb(${
+        {{'name': '在庫管理', 'url': '/inventory'}, {'name': '在庫履歴', 'url': '/inventory/history/' + product.id}}
+    })"></div>
+    
+    <div class="container mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>在庫履歴</h2>
+            <div>
+                <a th:href="@{/inventory}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> 在庫一覧に戻る
+                </a>
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">商品情報</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>商品ID:</strong> <span th:text="${product.id}">1</span></p>
+                        <p><strong>商品名:</strong> <span th:text="${product.name}">商品名</span></p>
+                        <p><strong>JANコード:</strong> <span th:text="${product.janCode}">4901234567890</span></p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>カテゴリ:</strong> <span th:text="${product.category != null ? product.category.name : '未分類'}">カテゴリ名</span></p>
+                        <p><strong>現在庫数:</strong> <span th:text="${product.stockQuantity + ' ' + product.stockUnit}"
+                                 th:class="${product.stockQuantity == 0 ? 'badge bg-danger' : 
+                                          (product.stockQuantity <= 10 ? 'badge bg-warning text-dark' : 'badge bg-success')}">10 個</span></p>
+                        <p><strong>状態:</strong> <span th:text="${product.status}"
+                                 th:class="${product.status == '販売中' ? 'badge bg-success' : 
+                                          (product.status == '入荷待ち' ? 'badge bg-warning text-dark' : 
+                                          (product.status == '販売終了' ? 'badge bg-secondary' : 'badge bg-info'))}">販売中</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">在庫移動履歴</h5>
+                <span class="badge bg-light text-dark" th:text="${'全 ' + inventoryHistories.size() + ' 件'}">全 0 件</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>日時</th>
+                                <th>タイプ</th>
+                                <th>数量</th>
+                                <th>理由</th>
+                                <th>備考</th>
+                                <th>ユーザー</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="history : ${inventoryHistories}">
+                                <td th:text="${history.id}">1</td>
+                                <td th:text="${#temporals.format(history.createdAt, 'yyyy/MM/dd HH:mm')}">2025/05/04 10:30</td>
+                                <td>
+                                    <span th:text="${history.type}"
+                                          th:class="${history.type == '入庫' ? 'badge bg-success' : 'badge bg-danger'}">
+                                        入庫
+                                    </span>
+                                </td>
+                                <td th:text="${history.quantity}">10</td>
+                                <td th:text="${history.reason}">通常入荷</td>
+                                <td th:text="${history.note}">備考情報</td>
+                                <td th:text="${history.user != null ? history.user.fullName : 'システム'}">管理者</td>
+                            </tr>
+                            <tr th:if="${inventoryHistories.empty}">
+                                <td colspan="7" class="text-center py-4">履歴データがありません</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            <div id="stockChart" style="height: 300px;"></div>
+        </div>
+    </div>
+    
+    <footer th:replace="fragments/layout :: footer"></footer>
+    
+    <!-- ApexCharts.js を読み込み -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            // 在庫履歴データを取得
+            const inventoryHistories = /*[[${inventoryHistories}]]*/ [];
+            if (inventoryHistories.length > 0) {
+                // データポイントの準備
+                const stockData = [];
+                let currentStock = [[${product.stockQuantity}]];
+                
+                // 履歴を日付の昇順（古い順）に並べ替え
+                const sortedHistories = [...inventoryHistories].sort((a, b) => 
+                    new Date(a.createdAt) - new Date(b.createdAt)
+                );
+                
+                // 履歴をさかのぼって在庫数を計算
+                for (let i = sortedHistories.length - 1; i >= 0; i--) {
+                    const history = sortedHistories[i];
+                    if (history.type === '入庫') {
+                        currentStock -= history.quantity;
+                    } else {
+                        currentStock += history.quantity;
+                    }
+                    
+                    // 在庫がマイナスにならないように調整
+                    if (currentStock < 0) currentStock = 0;
+                }
+                
+                // 初期在庫データポイント
+                stockData.push({
+                    x: new Date(sortedHistories[0].createdAt).getTime() - 86400000, // 1日前
+                    y: currentStock
+                });
+                
+                // 各履歴ポイントのデータを作成
+                for (const history of sortedHistories) {
+                    if (history.type === '入庫') {
+                        currentStock += history.quantity;
+                    } else {
+                        currentStock -= history.quantity;
+                    }
+                    
+                    stockData.push({
+                        x: new Date(history.createdAt).getTime(),
+                        y: currentStock
+                    });
+                }
+                
+                // グラフのオプション
+                const options = {
+                    series: [{
+                        name: '在庫数',
+                        data: stockData
+                    }],
+                    chart: {
+                        type: 'area',
+                        height: 300,
+                        toolbar: {
+                            show: false
+                        },
+                        zoom: {
+                            enabled: false
+                        }
+                    },
+                    dataLabels: {
+                        enabled: false
+                    },
+                    stroke: {
+                        curve: 'smooth',
+                        width: 2
+                    },
+                    colors: ['#0d6efd'],
+                    fill: {
+                        type: 'gradient',
+                        gradient: {
+                            shadeIntensity: 1,
+                            opacityFrom: 0.7,
+                            opacityTo: 0.3
+                        }
+                    },
+                    title: {
+                        text: '在庫推移グラフ',
+                        align: 'left',
+                        style: {
+                            fontSize: '16px',
+                            fontWeight: 'bold'
+                        }
+                    },
+                    xaxis: {
+                        type: 'datetime',
+                        labels: {
+                            datetimeUTC: false,
+                            format: 'yyyy/MM/dd'
+                        },
+                        tooltip: {
+                            format: 'yyyy/MM/dd HH:mm'
+                        }
+                    },
+                    yaxis: {
+                        title: {
+                            text: '在庫数'
+                        },
+                        min: 0
+                    },
+                    tooltip: {
+                        x: {
+                            format: 'yyyy/MM/dd HH:mm'
+                        }
+                    },
+                    markers: {
+                        size: 4,
+                        colors: ['#0d6efd'],
+                        strokeColors: '#fff',
+                        strokeWidth: 2
+                    }
+                };
+                
+                // グラフの初期化
+                const chart = new ApexCharts(document.querySelector("#stockChart"), options);
+                chart.render();
+            } else {
+                document.getElementById('stockChart').innerHTML = '<div class="alert alert-info">履歴データが不足しているため、グラフを表示できません。</div>';
+            }
+        });
+    </script>
+</body>
+</html>

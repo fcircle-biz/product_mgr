@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('システム設定')}">
+    <title>システム設定 | 商品管理システム</title>
+</head>
+<body>
+    <nav th:replace="~{fragments/layout :: navbar}"></nav>
+    
+    <div th:replace="~{fragments/layout :: messages}"></div>
+
+    <div class="container mt-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/}">メインメニュー</a></li>
+                <li class="breadcrumb-item active">システム設定</li>
+            </ol>
+        </nav>
+        
+        <h2 class="mb-4">システム設定</h2>
+        
+        <div class="row">
+            <div class="col-md-3">
+                <div class="list-group mb-4" id="settings-tab" role="tablist">
+                    <a class="list-group-item list-group-item-action active" id="basic-tab" data-bs-toggle="list" href="#basic" role="tab" aria-controls="basic">
+                        <i class="bi bi-sliders"></i> 基本設定
+                    </a>
+                    <a class="list-group-item list-group-item-action" id="notification-tab" data-bs-toggle="list" href="#notification" role="tab" aria-controls="notification">
+                        <i class="bi bi-bell"></i> 通知設定
+                    </a>
+                    <a class="list-group-item list-group-item-action" id="backup-tab" data-bs-toggle="list" href="#backup" role="tab" aria-controls="backup">
+                        <i class="bi bi-cloud-arrow-up"></i> バックアップ
+                    </a>
+                </div>
+            </div>
+            
+            <div class="col-md-9">
+                <div class="tab-content" id="settings-tabContent">
+                    <!-- 基本設定 -->
+                    <div class="tab-pane fade show active" id="basic" role="tabpanel" aria-labelledby="basic-tab">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">基本設定</h5>
+                            </div>
+                            <div class="card-body">
+                                <form th:action="@{/settings/basic}" method="post">
+                                    <div class="mb-3">
+                                        <label for="companyName" class="form-label">会社名</label>
+                                        <input type="text" class="form-control" id="companyName" name="companyName" 
+                                               th:value="${companyName}" required>
+                                        <div class="form-text">アプリケーション全体で表示される会社名です。</div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="lowStockThreshold" class="form-label">在庫少警告しきい値</label>
+                                        <input type="number" class="form-control" id="lowStockThreshold" name="lowStockThreshold" 
+                                               th:value="${lowStockThreshold}" min="1" required>
+                                        <div class="form-text">この数値以下になると在庫が少ないと警告されます。</div>
+                                    </div>
+                                    
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-check-circle"></i> 保存
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 通知設定 -->
+                    <div class="tab-pane fade" id="notification" role="tabpanel" aria-labelledby="notification-tab">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">通知設定</h5>
+                            </div>
+                            <div class="card-body">
+                                <form th:action="@{/settings/notification}" method="post">
+                                    <div class="form-check form-switch mb-3">
+                                        <input class="form-check-input" type="checkbox" id="enableNotifications" name="enableNotifications" 
+                                               th:checked="${enableNotifications}">
+                                        <label class="form-check-label" for="enableNotifications">通知を有効にする</label>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="notificationEmail" class="form-label">通知メールアドレス</label>
+                                        <input type="email" class="form-control" id="notificationEmail" name="notificationEmail" 
+                                               th:value="${notificationEmail}">
+                                        <div class="form-text">在庫切れなどの通知が送信されるメールアドレスです。</div>
+                                    </div>
+                                    
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-check-circle"></i> 保存
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- バックアップ設定 -->
+                    <div class="tab-pane fade" id="backup" role="tabpanel" aria-labelledby="backup-tab">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">バックアップ設定</h5>
+                            </div>
+                            <div class="card-body">
+                                <form th:action="@{/settings/backup}" method="post">
+                                    <div class="form-check form-switch mb-3">
+                                        <input class="form-check-input" type="checkbox" id="autoBackup" name="autoBackup" 
+                                               th:checked="${autoBackup}">
+                                        <label class="form-check-label" for="autoBackup">自動バックアップを有効にする</label>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="backupIntervalDays" class="form-label">バックアップ間隔（日）</label>
+                                        <input type="number" class="form-control" id="backupIntervalDays" name="backupIntervalDays" 
+                                               th:value="${backupIntervalDays}" min="1" required>
+                                        <div class="form-text">自動バックアップを実行する間隔を日数で指定します。</div>
+                                    </div>
+                                    
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-check-circle"></i> 保存
+                                    </button>
+                                    
+                                    <div class="mt-4">
+                                        <a href="#" class="btn btn-secondary">
+                                            <i class="bi bi-download"></i> 今すぐバックアップを実行
+                                        </a>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

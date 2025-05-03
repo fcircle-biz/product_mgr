@@ -13,35 +13,35 @@ import java.util.List;
 public interface InventoryHistoryRepository extends CrudRepository<InventoryHistory, Long> {
 
     @Query("SELECT ih.*, p.id as p_id, p.name as p_name " +
-           "FROM inventory_history ih " +
+           "FROM inventory_histories ih " +
            "JOIN products p ON ih.product_id = p.id " +
            "WHERE ih.product_id = :productId " +
            "ORDER BY ih.created_at DESC")
     List<InventoryHistory> findByProductId(@Param("productId") Long productId);
     
     @Query("SELECT ih.*, p.id as p_id, p.name as p_name, u.id as u_id, u.username as u_username, u.full_name as u_full_name " +
-           "FROM inventory_history ih " +
+           "FROM inventory_histories ih " +
            "JOIN products p ON ih.product_id = p.id " +
-           "JOIN users u ON ih.user_id = u.id " +
+           "JOIN users u ON ih.operated_by = u.id " +
            "WHERE ih.product_id = :productId " +
            "ORDER BY ih.created_at DESC " +
            "LIMIT :limit")
     List<InventoryHistory> findLatestByProductId(@Param("productId") Long productId, @Param("limit") int limit);
     
     @Query("SELECT ih.*, p.id as p_id, p.name as p_name, u.id as u_id, u.username as u_username, u.full_name as u_full_name " +
-           "FROM inventory_history ih " +
+           "FROM inventory_histories ih " +
            "JOIN products p ON ih.product_id = p.id " +
-           "JOIN users u ON ih.user_id = u.id " +
+           "JOIN users u ON ih.operated_by = u.id " +
            "WHERE ih.created_at BETWEEN :startDate AND :endDate " +
            "ORDER BY ih.created_at DESC")
     List<InventoryHistory> findByDateRange(@Param("startDate") LocalDateTime startDate, 
                                            @Param("endDate") LocalDateTime endDate);
 
     @Query("SELECT ih.*, p.id as p_id, p.name as p_name, u.id as u_id, u.username as u_username, u.full_name as u_full_name " +
-           "FROM inventory_history ih " +
+           "FROM inventory_histories ih " +
            "JOIN products p ON ih.product_id = p.id " +
-           "JOIN users u ON ih.user_id = u.id " +
-           "WHERE ih.type = :type " +
+           "JOIN users u ON ih.operated_by = u.id " +
+           "WHERE (ih.quantity_change > 0 AND :type = '入庫') OR (ih.quantity_change < 0 AND :type = '出庫') " +
            "ORDER BY ih.created_at DESC")
     List<InventoryHistory> findByType(@Param("type") String type);
 }

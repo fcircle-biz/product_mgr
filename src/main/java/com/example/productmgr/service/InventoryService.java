@@ -48,14 +48,28 @@ public class InventoryService {
         
         Product product = productOpt.get();
         
+        // 互換性のために新しいフィールドにデータをセット
+        // quantityChangeがセットされていない場合、typeとquantityから設定
+        if (history.getQuantityChange() == null) {
+            String type = history.getType();
+            Integer quantity = history.getQuantity();
+            
+            // 数量がプラスであること確認
+            if (quantity == null || quantity <= 0) {
+                throw new RuntimeException("数量は1以上で指定してください");
+            }
+            
+            history.setTypeAndQuantity(type, quantity);
+        }
+        
         // 出庫処理で在庫が不足していないか確認
-        if ("出庫".equals(history.getType()) && product.getStockQuantity() < history.getQuantity()) {
+        if (history.getQuantityChange() < 0 && product.getStockQuantity() < Math.abs(history.getQuantityChange())) {
             throw new RuntimeException("在庫数が不足しています");
         }
         
-        // 数量がプラスであること確認
-        if (history.getQuantity() <= 0) {
-            throw new RuntimeException("数量は1以上で指定してください");
+        // 旧フィールド名から新フィールド名への移行
+        if (history.getOperatedBy() == null && history.getUserId() != null) {
+            history.setOperatedBy(history.getUserId());
         }
         
         // 作成日時設定

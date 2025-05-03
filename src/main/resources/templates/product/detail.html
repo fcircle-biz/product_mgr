@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('商品詳細')}">
+    <title>商品詳細 | 商品管理システム</title>
+</head>
+<body>
+    <nav th:replace="~{fragments/layout :: navbar}"></nav>
+    
+    <div th:replace="~{fragments/layout :: messages}"></div>
+
+    <div class="container mt-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/}">メインメニュー</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/products}">商品一覧</a></li>
+                <li class="breadcrumb-item active">商品詳細</li>
+            </ol>
+        </nav>
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2>商品詳細</h2>
+            <div>
+                <a th:href="@{/products/{id}/edit(id=${product.id})}" class="btn btn-primary">
+                    <i class="bi bi-pencil"></i> 編集
+                </a>
+                <form th:action="@{/products/{id}/delete(id=${product.id})}" method="post" class="d-inline" 
+                      onsubmit="return confirm('この商品を削除してもよろしいですか？');">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash"></i> 削除
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">基本情報</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-bordered">
+                            <tr>
+                                <th class="table-light" style="width: 30%">商品ID</th>
+                                <td th:text="${product.id}">001</td>
+                            </tr>
+                            <tr>
+                                <th class="table-light">商品名</th>
+                                <td th:text="${product.name}">高級ボールペン シルバー</td>
+                            </tr>
+                            <tr>
+                                <th class="table-light">JANコード</th>
+                                <td th:text="${product.janCode ?: '登録なし'}">4901234567890</td>
+                            </tr>
+                            <tr>
+                                <th class="table-light">カテゴリ</th>
+                                <td th:text="${product.category?.name}">文房具</td>
+                            </tr>
+                            <tr>
+                                <th class="table-light">価格</th>
+                                <td th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + '円'">¥1,200</td>
+                            </tr>
+                            <tr>
+                                <th class="table-light">商品状態</th>
+                                <td>
+                                    <span th:if="${product.stockQuantity == 0}" class="badge bg-danger">在庫切れ</span>
+                                    <span th:if="${product.stockQuantity > 0 && product.stockQuantity <= 10}" class="badge bg-warning text-dark">在庫少</span>
+                                    <span th:if="${product.stockQuantity > 10}" class="badge bg-success" th:text="${product.status}">販売中</span>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">在庫情報</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-bordered">
+                            <tr>
+                                <th class="table-light" style="width: 30%">現在の在庫数</th>
+                                <td>
+                                    <span th:text="${product.stockQuantity} + ' ' + ${product.stockUnit}">120 個</span>
+                                    <a th:href="@{/inventory/{id}(id=${product.id})}" class="btn btn-sm btn-outline-primary float-end">
+                                        <i class="bi bi-box-arrow-in-down"></i> 入出庫
+                                    </a>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">在庫履歴</h5>
+                        <a th:href="@{/inventory/history/{id}(id=${product.id})}" class="btn btn-sm btn-outline-secondary">
+                            すべて表示
+                        </a>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>日時</th>
+                                    <th>タイプ</th>
+                                    <th>数量</th>
+                                    <th>理由</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="history : ${inventoryHistories}">
+                                    <td th:text="${#temporals.format(history.createdAt, 'yyyy/MM/dd HH:mm')}">2023/04/01 10:00</td>
+                                    <td>
+                                        <span th:if="${history.type == '入庫'}" class="badge bg-success" th:text="${history.type}">入庫</span>
+                                        <span th:if="${history.type == '出庫'}" class="badge bg-danger" th:text="${history.type}">出庫</span>
+                                    </td>
+                                    <td th:text="${history.quantity} + ' ' + ${product.stockUnit}">50 個</td>
+                                    <td th:text="${history.reason}">初期在庫</td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(inventoryHistories)}">
+                                    <td colspan="4" class="text-center">在庫履歴がありません</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">商品説明</h5>
+            </div>
+            <div class="card-body">
+                <p th:if="${product.description}" th:text="${product.description}" class="mb-0">
+                    高級感のあるシルバー仕上げのボールペンです。程よい重量感と書き心地の良さが特徴で、ビジネスシーンでの使用に最適です。替えインクは一般的なタイプが使用可能です。
+                </p>
+                <p th:unless="${product.description}" class="text-muted mb-0">
+                    商品説明はありません
+                </p>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between mt-4">
+            <a th:href="@{/products}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> 一覧へ戻る
+            </a>
+            <a th:href="@{/inventory/{id}(id=${product.id})}" class="btn btn-primary">
+                <i class="bi bi-box-arrow-in-down"></i> 入出庫処理
+            </a>
+        </div>
+    </div>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

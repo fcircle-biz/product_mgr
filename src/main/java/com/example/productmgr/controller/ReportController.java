@@ -21,11 +21,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -512,6 +514,387 @@ public class ReportController {
                         history.getReason(),
                         history.getNote(),
                         history.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+                );
+            }
+            
+            csvPrinter.flush();
+        }
+    }
+    
+    @GetMapping("/export/monthly")
+    public void exportMonthlyReport(
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM") String yearMonth,
+            HttpServletResponse response) throws IOException {
+        
+        // デフォルトは今月
+        YearMonth targetMonth;
+        if (yearMonth == null) {
+            targetMonth = YearMonth.now();
+        } else {
+            targetMonth = YearMonth.parse(yearMonth);
+        }
+        
+        LocalDateTime startDateTime = LocalDateTime.of(targetMonth.atDay(1), LocalTime.MIN);
+        LocalDateTime endDateTime = LocalDateTime.of(targetMonth.atEndOfMonth(), LocalTime.MAX);
+        
+        // 指定された月の在庫履歴を取得
+        List<InventoryHistory> histories = inventoryService.findByDateRange(startDateTime, endDateTime);
+        
+        // レスポンスの設定
+        response.setContentType("text/csv");
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("Content-Disposition", "attachment; filename=monthly_report_" + targetMonth + ".csv");
+        
+        // CSVヘッダー
+        String[] headers = {"日付", "商品ID", "商品名", "取引種別", "数量", "理由", "備考"};
+        
+        try (PrintWriter writer = response.getWriter();
+             CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.withHeader(headers))) {
+            
+            // 商品情報のマッピング
+            Map<Long, Product> productMap = productService.findAll().stream()
+                    .collect(Collectors.toMap(Product::getId, p -> p));
+            
+            // データの書き込み
+            for (InventoryHistory history : histories) {
+                Product product = productMap.get(history.getProductId());
+                String productName = product != null ? product.getName() : "Unknown";
+                
+                csvPrinter.printRecord(
+                        history.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                        history.getProductId(),
+                        productName,
+                        history.getType(),
+                        history.getQuantity(),
+                        history.getReason(),
+                        history.getNote()
+                );
+            }
+            
+            csvPrinter.flush();
+        }
+    }
+    
+    @GetMapping("/export/stock-warning")
+    public void exportStockWarningReport(HttpServletResponse response) throws IOException {
+        List<Product> outOfStockProducts = productService.findOutOfStock();
+        List<Product> lowStockProducts = productService.findLowStock();
+        
+        // レスポンスの設定
+        response.setContentType("text/csv");
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("Content-Disposition", "attachment; filename=stock_warning_report.csv");
+        
+        // CSVヘッダー
+        String[] headers = {"商品ID", "商品コード", "商品名", "カテゴリ", "現在の在庫", "警告状態", "価格"};
+        
+        try (PrintWriter writer = response.getWriter();
+             CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.withHeader(headers))) {
+            
+            // カテゴリ情報のマッピング
+            Map<Long, String> categoryMap = categoryService.findAllSorted().stream()
+                    .collect(Collectors.toMap(c -> c.getId(), c -> c.getName()));
+            
+            // 在庫切れ商品のデータ書き込み
+            for (Product product : outOfStockProducts) {
+                String categoryName = categoryMap.getOrDefault(product.getCategoryId(), "未分類");
+                
+                csvPrinter.printRecord(
+                        product.getId(),
+                        product.getCode(),
+                        product.getName(),
+                        categoryName,
+                        product.getStockQuantity(),
+                        "在庫切れ",
+                        product.getPrice()
+                );
+            }
+            
+            // 在庫少商品のデータ書き込み
+            for (Product product : lowStockProducts) {
+                String categoryName = categoryMap.getOrDefault(product.getCategoryId(), "未分類");
+                
+                csvPrinter.printRecord(
+                        product.getId(),
+                        product.getCode(),
+                        product.getName(),
+                        categoryName,
+                        product.getStockQuantity(),
+                        "在庫少",
+                        product.getPrice()
+                );
+            }
+            
+            csvPrinter.flush();
+        }
+    }
+    
+    @GetMapping("/export/category-distribution")
+    public void exportCategoryDistribution(HttpServletResponse response) throws IOException {
+        List<Product> products = productService.findAll();
+        
+        // レスポンスの設定
+        response.setContentType("text/csv");
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("Content-Disposition", "attachment; filename=category_distribution.csv");
+        
+        // CSVヘッダー
+        String[] headers = {"カテゴリID", "カテゴリ名", "商品数", "総在庫数", "平均価格"};
+        
+        try (PrintWriter writer = response.getWriter();
+             CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.withHeader(headers))) {
+            
+            // カテゴリ情報を取得
+            List<Map<String, Object>> categoryStats = new ArrayList<>();
+            
+            // カテゴリごとの統計情報を計算
+            categoryService.findAllSorted().forEach(category -> {
+                Map<String, Object> stats = new HashMap<>();
+                stats.put("categoryId", category.getId());
+                stats.put("categoryName", category.getName());
+                
+                List<Product> categoryProducts = products.stream()
+                        .filter(p -> p.getCategoryId().equals(category.getId()))
+                        .collect(Collectors.toList());
+                
+                int productCount = categoryProducts.size();
+                int totalStock = categoryProducts.stream()
+                        .mapToInt(Product::getStockQuantity)
+                        .sum();
+                
+                double averagePrice = categoryProducts.stream()
+                        .mapToDouble(p -> p.getPrice().doubleValue())
+                        .average()
+                        .orElse(0.0);
+                
+                stats.put("productCount", productCount);
+                stats.put("totalStock", totalStock);
+                stats.put("averagePrice", averagePrice);
+                
+                categoryStats.add(stats);
+            });
+            
+            // データの書き込み
+            for (Map<String, Object> stats : categoryStats) {
+                csvPrinter.printRecord(
+                        stats.get("categoryId"),
+                        stats.get("categoryName"),
+                        stats.get("productCount"),
+                        stats.get("totalStock"),
+                        stats.get("averagePrice")
+                );
+            }
+            
+            csvPrinter.flush();
+        }
+    }
+    
+    @GetMapping("/inventory-turnover")
+    public String inventoryTurnoverReport(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            Model model) {
+        
+        // デフォルトは過去90日間（3ヶ月）
+        if (startDate == null) {
+            startDate = LocalDate.now().minusDays(90);
+        }
+        
+        if (endDate == null) {
+            endDate = LocalDate.now();
+        }
+        
+        LocalDateTime startDateTime = LocalDateTime.of(startDate, LocalTime.MIN);
+        LocalDateTime endDateTime = LocalDateTime.of(endDate, LocalTime.MAX);
+        
+        // 期間（日数）を計算
+        long periodDays = ChronoUnit.DAYS.between(startDate, endDate) + 1;
+        
+        // 全商品リスト取得
+        List<Product> products = productService.findAll();
+        
+        // 在庫回転率のデータを格納するリスト
+        List<Map<String, Object>> turnoverData = new ArrayList<>();
+        
+        // 商品ごとに在庫回転率を計算
+        for (Product product : products) {
+            Map<String, Object> productData = new HashMap<>();
+            productData.put("product", product);
+            
+            // 商品のIDを取得
+            Long productId = product.getId();
+            
+            // 商品の在庫履歴を取得
+            List<InventoryHistory> productHistories = inventoryService.findByProductId(productId).stream()
+                    .filter(h -> !h.getCreatedAt().isBefore(startDateTime) && !h.getCreatedAt().isAfter(endDateTime))
+                    .collect(Collectors.toList());
+            
+            // 出庫数量の合計を計算
+            int totalOutbound = productHistories.stream()
+                    .filter(h -> "出庫".equals(h.getType()))
+                    .mapToInt(InventoryHistory::getQuantity)
+                    .sum();
+            
+            // 現在の在庫数量を取得
+            int currentStock = product.getStockQuantity();
+            
+            // 初期在庫を計算
+            int initialStock = currentStock;
+            
+            // 期間中の入出庫を考慮して初期在庫を算出
+            for (InventoryHistory history : productHistories) {
+                if ("入庫".equals(history.getType())) {
+                    initialStock -= history.getQuantity();
+                } else if ("出庫".equals(history.getType())) {
+                    initialStock += history.getQuantity();
+                }
+            }
+            
+            // 初期在庫がマイナスにならないよう調整
+            if (initialStock < 0) {
+                initialStock = 0;
+            }
+            
+            // 平均在庫を計算
+            double averageStock = (initialStock + currentStock) / 2.0;
+            
+            // 在庫回転率 = 出庫数 / 平均在庫
+            double turnoverRate = averageStock > 0 ? totalOutbound / averageStock : 0;
+            
+            // 年間換算の在庫回転率 = 回転率 * (365 / 期間日数)
+            double annualizedTurnoverRate = turnoverRate * (365.0 / periodDays);
+            
+            // 在庫回転日数 = 平均在庫 / (出庫数 / 期間日数)
+            double dailyOutbound = totalOutbound / (double) periodDays;
+            double turnoverDays = dailyOutbound > 0 ? averageStock / dailyOutbound : 0;
+            
+            productData.put("initialStock", initialStock);
+            productData.put("currentStock", currentStock);
+            productData.put("averageStock", averageStock);
+            productData.put("totalOutbound", totalOutbound);
+            productData.put("turnoverRate", BigDecimal.valueOf(turnoverRate).setScale(2, RoundingMode.HALF_UP));
+            productData.put("annualizedTurnoverRate", BigDecimal.valueOf(annualizedTurnoverRate).setScale(2, RoundingMode.HALF_UP));
+            productData.put("turnoverDays", BigDecimal.valueOf(turnoverDays).setScale(1, RoundingMode.HALF_UP));
+            
+            turnoverData.add(productData);
+        }
+        
+        // 在庫回転率の降順でソート
+        turnoverData.sort((a, b) -> {
+            BigDecimal rateA = (BigDecimal) a.get("annualizedTurnoverRate");
+            BigDecimal rateB = (BigDecimal) b.get("annualizedTurnoverRate");
+            return rateB.compareTo(rateA);
+        });
+        
+        model.addAttribute("startDate", startDate);
+        model.addAttribute("endDate", endDate);
+        model.addAttribute("turnoverData", turnoverData);
+        model.addAttribute("totalProducts", products.size());
+        
+        return "report/inventory_turnover";
+    }
+    
+    @GetMapping("/export/inventory-turnover")
+    public void exportInventoryTurnoverReport(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            HttpServletResponse response) throws IOException {
+        
+        // デフォルトは過去90日間（3ヶ月）
+        if (startDate == null) {
+            startDate = LocalDate.now().minusDays(90);
+        }
+        
+        if (endDate == null) {
+            endDate = LocalDate.now();
+        }
+        
+        LocalDateTime startDateTime = LocalDateTime.of(startDate, LocalTime.MIN);
+        LocalDateTime endDateTime = LocalDateTime.of(endDate, LocalTime.MAX);
+        
+        // 期間（日数）を計算
+        long periodDays = ChronoUnit.DAYS.between(startDate, endDate) + 1;
+        
+        // 全商品リスト取得
+        List<Product> products = productService.findAll();
+        
+        // レスポンスの設定
+        response.setContentType("text/csv");
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("Content-Disposition", "attachment; filename=inventory_turnover_" + startDate + "_to_" + endDate + ".csv");
+        
+        // CSVヘッダー
+        String[] headers = {"商品ID", "商品コード", "商品名", "カテゴリ", "初期在庫", "現在在庫", "平均在庫", "出庫数", "在庫回転率", "年間換算回転率", "在庫回転日数"};
+        
+        try (PrintWriter writer = response.getWriter();
+             CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.withHeader(headers))) {
+            
+            // カテゴリ情報のマッピング
+            Map<Long, String> categoryMap = categoryService.findAllSorted().stream()
+                    .collect(Collectors.toMap(c -> c.getId(), c -> c.getName()));
+            
+            // 商品ごとに在庫回転率を計算
+            for (Product product : products) {
+                // 商品のIDを取得
+                Long productId = product.getId();
+                String categoryName = categoryMap.getOrDefault(product.getCategoryId(), "未分類");
+                
+                // 商品の在庫履歴を取得
+                List<InventoryHistory> productHistories = inventoryService.findByProductId(productId).stream()
+                        .filter(h -> !h.getCreatedAt().isBefore(startDateTime) && !h.getCreatedAt().isAfter(endDateTime))
+                        .collect(Collectors.toList());
+                
+                // 出庫数量の合計を計算
+                int totalOutbound = productHistories.stream()
+                        .filter(h -> "出庫".equals(h.getType()))
+                        .mapToInt(InventoryHistory::getQuantity)
+                        .sum();
+                
+                // 現在の在庫数量を取得
+                int currentStock = product.getStockQuantity();
+                
+                // 初期在庫を計算
+                int initialStock = currentStock;
+                
+                // 期間中の入出庫を考慮して初期在庫を算出
+                for (InventoryHistory history : productHistories) {
+                    if ("入庫".equals(history.getType())) {
+                        initialStock -= history.getQuantity();
+                    } else if ("出庫".equals(history.getType())) {
+                        initialStock += history.getQuantity();
+                    }
+                }
+                
+                // 初期在庫がマイナスにならないよう調整
+                if (initialStock < 0) {
+                    initialStock = 0;
+                }
+                
+                // 平均在庫を計算
+                double averageStock = (initialStock + currentStock) / 2.0;
+                
+                // 在庫回転率 = 出庫数 / 平均在庫
+                double turnoverRate = averageStock > 0 ? totalOutbound / averageStock : 0;
+                
+                // 年間換算の在庫回転率 = 回転率 * (365 / 期間日数)
+                double annualizedTurnoverRate = turnoverRate * (365.0 / periodDays);
+                
+                // 在庫回転日数 = 平均在庫 / (出庫数 / 期間日数)
+                double dailyOutbound = totalOutbound / (double) periodDays;
+                double turnoverDays = dailyOutbound > 0 ? averageStock / dailyOutbound : 0;
+                
+                csvPrinter.printRecord(
+                        product.getId(),
+                        product.getJanCode(),
+                        product.getName(),
+                        categoryName,
+                        initialStock,
+                        currentStock,
+                        BigDecimal.valueOf(averageStock).setScale(1, RoundingMode.HALF_UP),
+                        totalOutbound,
+                        BigDecimal.valueOf(turnoverRate).setScale(2, RoundingMode.HALF_UP),
+                        BigDecimal.valueOf(annualizedTurnoverRate).setScale(2, RoundingMode.HALF_UP),
+                        BigDecimal.valueOf(turnoverDays).setScale(1, RoundingMode.HALF_UP)
                 );
             }
             

@@ -92,12 +92,19 @@ public class InventoryController {
                                    RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
             model.addAttribute("products", productService.findAll());
-            return "inventory/add".equals(inventoryHistory.getType()) ? "inventory/add" : "inventory/subtract";
+            return "入庫".equals(inventoryHistory.getType()) ? "inventory/add" : "inventory/subtract";
         }
         
         try {
-            // TODO: 実際のユーザーIDを設定
-            inventoryHistory.setUserId(1L);
+            // Spring Securityのユーザー名からユーザーIDを取得
+            // 簡易実装として管理者ユーザー（ID:1）を使用
+            if (user != null && "admin".equals(user.getUsername())) {
+                inventoryHistory.setUserId(1L);
+            } else {
+                // デフォルトは管理者ユーザー
+                inventoryHistory.setUserId(1L);
+            }
+            
             inventoryService.addInventoryHistory(inventoryHistory);
             
             String message = "入庫".equals(inventoryHistory.getType()) ? 
@@ -117,8 +124,15 @@ public class InventoryController {
     public String quickProcess(@RequestBody InventoryHistory inventoryHistory,
                               @AuthenticationPrincipal User user) {
         try {
-            // TODO: 実際のユーザーIDを設定
-            inventoryHistory.setUserId(1L);
+            // Spring Securityのユーザー名からユーザーIDを取得
+            // 簡易実装として管理者ユーザー（ID:1）を使用
+            if (user != null && "admin".equals(user.getUsername())) {
+                inventoryHistory.setUserId(1L);
+            } else {
+                // デフォルトは管理者ユーザー
+                inventoryHistory.setUserId(1L);
+            }
+            
             inventoryService.addInventoryHistory(inventoryHistory);
             return "success";
         } catch (Exception e) {

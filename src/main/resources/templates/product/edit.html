@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('商品編集')}">
+    <title>商品編集 | 商品管理システム</title>
+</head>
+<body>
+    <nav th:replace="~{fragments/layout :: navbar}"></nav>
+    
+    <div th:replace="~{fragments/layout :: messages}"></div>
+
+    <div class="container mt-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/}">メインメニュー</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/products}">商品一覧</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/products/{id}(id=${product.id})}">商品詳細</a></li>
+                <li class="breadcrumb-item active">商品編集</li>
+            </ol>
+        </nav>
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">商品編集</h5>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/products/{id}(id=${product.id})}" method="post" th:object="${product}">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="name" class="form-label">商品名 <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="name" th:field="*{name}" required>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">
+                                商品名を入力してください
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="janCode" class="form-label">JANコード</label>
+                            <input type="text" class="form-control" id="janCode" th:field="*{janCode}" 
+                                   placeholder="任意（13桁の数字）">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('janCode')}" th:errors="*{janCode}">
+                                有効なJANコード（13桁）を入力してください
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="categoryId" class="form-label">カテゴリ <span class="text-danger">*</span></label>
+                            <select class="form-select" id="categoryId" th:field="*{categoryId}" required>
+                                <option value="">カテゴリを選択してください</option>
+                                <option th:each="category : ${categories}" 
+                                        th:value="${category.id}" 
+                                        th:text="${category.name}"
+                                        th:selected="${category.id == product.categoryId}">
+                                    カテゴリ名
+                                </option>
+                            </select>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('categoryId')}" th:errors="*{categoryId}">
+                                カテゴリを選択してください
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="price" class="form-label">価格 (円) <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="price" th:field="*{price}" min="0" step="1" required>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('price')}" th:errors="*{price}">
+                                有効な価格を入力してください
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label for="stockUnit" class="form-label">在庫単位 <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="stockUnit" th:field="*{stockUnit}" required>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('stockUnit')}" th:errors="*{stockUnit}">
+                                在庫単位を入力してください
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="status" class="form-label">商品状態 <span class="text-danger">*</span></label>
+                            <select class="form-select" id="status" th:field="*{status}" required>
+                                <option value="販売中">販売中</option>
+                                <option value="入荷待ち">入荷待ち</option>
+                                <option value="販売終了">販売終了</option>
+                            </select>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('status')}" th:errors="*{status}">
+                                商品状態を選択してください
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label">商品説明</label>
+                        <textarea class="form-control" id="description" th:field="*{description}" rows="4" 
+                                  placeholder="商品の詳細情報を入力してください"></textarea>
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('description')}" th:errors="*{description}">
+                            商品説明は500文字以内で入力してください
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> 在庫数の変更は「在庫管理」画面から入出庫処理を行ってください。
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <a th:href="@{/products/{id}(id=${product.id})}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle"></i> キャンセル
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> 更新する
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

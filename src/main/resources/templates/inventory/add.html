@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="fragments/layout :: head('入庫登録')">
+    <meta charset="UTF-8">
+    <title>入庫登録</title>
+</head>
+
+<body>
+    <nav th:replace="fragments/layout :: navbar"></nav>
+    
+    <div th:replace="fragments/layout :: messages"></div>
+    
+    <div th:replace="fragments/layout :: breadcrumb(${
+        {{'name': '在庫管理', 'url': '/inventory'}, {'name': '入庫登録', 'url': '/inventory/add'}}
+    })"></div>
+    
+    <div class="container mb-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow">
+                    <div class="card-header bg-success text-white">
+                        <h4 class="mb-0">入庫登録</h4>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/inventory/process}" th:object="${inventoryHistory}" method="post">
+                            <input type="hidden" th:field="*{type}" value="入庫" />
+                            
+                            <div class="mb-3">
+                                <label for="productId" class="form-label">商品 <span class="text-danger">*</span></label>
+                                <select class="form-select" id="productId" th:field="*{productId}" required>
+                                    <option value="">商品を選択してください</option>
+                                    <option th:each="product : ${products}" 
+                                            th:value="${product.id}" 
+                                            th:text="${product.name + ' (' + product.janCode + ')'}">
+                                        商品名 (JANコード)
+                                    </option>
+                                </select>
+                                <div class="form-text">入庫する商品を選択してください</div>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('productId')}" th:errors="*{productId}">
+                                    商品を選択してください
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="quantity" class="form-label">数量 <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="quantity" th:field="*{quantity}" min="1" required>
+                                    <span class="input-group-text">個</span>
+                                </div>
+                                <div class="form-text">入庫する数量を入力してください</div>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('quantity')}" th:errors="*{quantity}">
+                                    1以上の数値を入力してください
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="reason" class="form-label">理由 <span class="text-danger">*</span></label>
+                                <select class="form-select" id="reason" th:field="*{reason}" required>
+                                    <option value="">選択してください</option>
+                                    <option value="通常入荷">通常入荷</option>
+                                    <option value="初期在庫">初期在庫</option>
+                                    <option value="返品">返品</option>
+                                    <option value="棚卸調整">棚卸調整</option>
+                                    <option value="その他">その他</option>
+                                </select>
+                                <div class="form-text">入庫理由を選択してください</div>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('reason')}" th:errors="*{reason}">
+                                    理由を選択してください
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="note" class="form-label">備考</label>
+                                <textarea class="form-control" id="note" th:field="*{note}" rows="3"></textarea>
+                                <div class="form-text">補足情報があれば入力してください</div>
+                            </div>
+                            
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle"></i> 入庫処理を行うと商品の在庫数が自動的に増加します。
+                            </div>
+                            
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a th:href="@{/inventory}" class="btn btn-secondary me-md-2">
+                                    <i class="bi bi-arrow-left"></i> キャンセル
+                                </a>
+                                <button type="submit" class="btn btn-success">
+                                    <i class="bi bi-check-circle"></i> 入庫登録
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer th:replace="fragments/layout :: footer"></footer>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 商品選択時の処理
+            const productSelect = document.getElementById('productId');
+            
+            // フォームのバリデーション
+            const form = document.querySelector('form');
+            form.addEventListener('submit', function(event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    </script>
+</body>
+</html>
