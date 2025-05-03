@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: product-mgr
+  datasource:
+    url: jdbc:postgresql://localhost:5432/productmgr
+    username: productmgr
+    password: productmgr
+    driver-class-name: org.postgresql.Driver
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+  data:
+    jdbc:
+      repositories:
+        enabled: true
+  thymeleaf:
+    cache: false
+  security:
+    user:
+      name: admin
+      password: admin
+
+server:
+  port: 8080
+  servlet:
+    context-path: /
+    session:
+      timeout: 30m
+
+logging:
+  level:
+    org.springframework.jdbc.core: DEBUG
+    com.example.productmgr: DEBUG
