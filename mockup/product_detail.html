@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商品詳細 | 商品管理システム</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+    <style>
+        .detail-header {
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .detail-section {
+            margin-bottom: 30px;
+        }
+        .table-detail th {
+            width: 30%;
+            background-color: #f8f9fa;
+        }
+        .history-table th {
+            background-color: #f8f9fa;
+        }
+        .inbound {
+            color: #198754;
+        }
+        .outbound {
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="#">商品管理システム</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="main_menu.html">メインメニュー</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="product_list.html">商品管理</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="inventory.html">在庫管理</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="report.html">レポート</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="login.html"><i class="bi bi-box-arrow-right"></i> ログアウト</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="main_menu.html">メインメニュー</a></li>
+                <li class="breadcrumb-item"><a href="product_list.html">商品一覧</a></li>
+                <li class="breadcrumb-item active">商品詳細</li>
+            </ol>
+        </nav>
+
+        <div class="detail-header d-flex justify-content-between align-items-center">
+            <h2>高級ボールペン シルバー</h2>
+            <div>
+                <a href="product_list.html" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> 一覧へ戻る</a>
+                <a href="product_edit.html" class="btn btn-outline-primary ms-2"><i class="bi bi-pencil"></i> 編集</a>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="detail-section">
+                    <h4>商品基本情報</h4>
+                    <table class="table table-bordered table-detail">
+                        <tr>
+                            <th>商品ID</th>
+                            <td>001</td>
+                        </tr>
+                        <tr>
+                            <th>商品名</th>
+                            <td>高級ボールペン シルバー</td>
+                        </tr>
+                        <tr>
+                            <th>JANコード</th>
+                            <td>4901234567890</td>
+                        </tr>
+                        <tr>
+                            <th>カテゴリ</th>
+                            <td>文房具</td>
+                        </tr>
+                        <tr>
+                            <th>販売価格（税抜）</th>
+                            <td>¥1,200</td>
+                        </tr>
+                        <tr>
+                            <th>現在の在庫数</th>
+                            <td><strong>120</strong> 個</td>
+                        </tr>
+                        <tr>
+                            <th>商品状態</th>
+                            <td><span class="badge bg-success">販売中</span></td>
+                        </tr>
+                        <tr>
+                            <th>商品説明</th>
+                            <td>
+                                高級感のあるシルバー仕上げのボールペンです。<br>
+                                程よい重量感と書き心地の良さが特徴で、ビジネスシーンでの使用に最適です。<br>
+                                替えインクは一般的なタイプが使用可能です。
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="detail-section">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4>在庫履歴</h4>
+                        <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#stockAdjustModal">
+                            <i class="bi bi-plus-minus"></i> 在庫調整
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered history-table">
+                            <thead>
+                                <tr>
+                                    <th>日時</th>
+                                    <th>区分</th>
+                                    <th>数量</th>
+                                    <th>担当者</th>
+                                    <th>理由</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>2025/05/01 17:30</td>
+                                    <td class="inbound">入庫</td>
+                                    <td class="inbound">+50</td>
+                                    <td>山田太郎</td>
+                                    <td>通常入荷</td>
+                                </tr>
+                                <tr>
+                                    <td>2025/04/25 14:15</td>
+                                    <td class="outbound">出庫</td>
+                                    <td class="outbound">-30</td>
+                                    <td>鈴木一郎</td>
+                                    <td>販売</td>
+                                </tr>
+                                <tr>
+                                    <td>2025/04/20 10:05</td>
+                                    <td class="inbound">入庫</td>
+                                    <td class="inbound">+100</td>
+                                    <td>田中花子</td>
+                                    <td>初期在庫</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="text-center mt-3">
+                        <a href="inventory_history.html" class="btn btn-sm btn-outline-secondary">履歴をすべて表示</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">在庫情報</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <h6>現在の在庫数</h6>
+                            <h2>120 <small class="text-muted">個</small></h2>
+                        </div>
+                        <div class="mb-3">
+                            <h6>在庫状態</h6>
+                            <div class="progress" style="height: 20px;">
+                                <div class="progress-bar bg-success" style="width: 80%">十分</div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <h6>在庫推移（過去30日）</h6>
+                            <div style="height: 100px; background-color: #f8f9fa; border-radius: 5px; padding: 10px; text-align: center;">
+                                グラフ表示領域
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <small class="text-muted">最終入庫: 2025/05/01</small><br>
+                        <small class="text-muted">最終出庫: 2025/04/25</small>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">管理情報</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <strong>登録日:</strong> 2025/04/20
+                        </div>
+                        <div class="mb-3">
+                            <strong>最終更新日:</strong> 2025/05/01
+                        </div>
+                        <div class="mb-3">
+                            <strong>更新者:</strong> 山田太郎
+                        </div>
+                        <hr>
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                <i class="bi bi-trash"></i> 商品を削除
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 在庫調整モーダル -->
+    <div class="modal fade" id="stockAdjustModal" tabindex="-1" aria-labelledby="stockAdjustModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="stockAdjustModalLabel">在庫調整</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label class="form-label">区分</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="stockType" id="stockTypeIn" checked>
+                                <label class="form-check-label" for="stockTypeIn">
+                                    入庫
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="stockType" id="stockTypeOut">
+                                <label class="form-check-label" for="stockTypeOut">
+                                    出庫
+                                </label>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="stockQuantity" class="form-label">数量</label>
+                            <input type="number" class="form-control" id="stockQuantity" min="1" value="1">
+                        </div>
+                        <div class="mb-3">
+                            <label for="stockReason" class="form-label">理由</label>
+                            <select class="form-select" id="stockReason">
+                                <option>通常入荷</option>
+                                <option>返品</option>
+                                <option>販売</option>
+                                <option>破損</option>
+                                <option>棚卸調整</option>
+                                <option>その他</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="stockNote" class="form-label">備考（任意）</label>
+                            <textarea class="form-control" id="stockNote" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
+                    <button type="button" class="btn btn-primary">確定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 削除確認モーダル -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">商品削除の確認</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle-fill"></i> この操作は取り消せません。
+                    </div>
+                    <p>以下の商品を削除しますか？</p>
+                    <p><strong>商品ID:</strong> 001</p>
+                    <p><strong>商品名:</strong> 高級ボールペン シルバー</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
+                    <button type="button" class="btn btn-danger">削除する</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

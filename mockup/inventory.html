@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>在庫管理 | 商品管理システム</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+    <style>
+        .table th {
+            background-color: #f8f9fa;
+        }
+        .search-box {
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .out-of-stock {
+            background-color: #ffe0e0;
+        }
+        .low-stock {
+            background-color: #fff8e0;
+        }
+        .stock-badge {
+            width: 70px;
+            display: inline-block;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="#">商品管理システム</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="main_menu.html">メインメニュー</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="product_list.html">商品管理</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="inventory.html">在庫管理</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="report.html">レポート</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="login.html"><i class="bi bi-box-arrow-right"></i> ログアウト</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="main_menu.html">メインメニュー</a></li>
+                <li class="breadcrumb-item active">在庫管理</li>
+            </ol>
+        </nav>
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2>在庫管理</h2>
+            <div>
+                <button class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#inboundModal">
+                    <i class="bi bi-box-arrow-in-down"></i> 入庫登録
+                </button>
+                <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#outboundModal">
+                    <i class="bi bi-box-arrow-up"></i> 出庫登録
+                </button>
+            </div>
+        </div>
+
+        <div class="search-box">
+            <form class="row g-3">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="商品名・JANコードで検索">
+                        <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-search"></i> 検索</button>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select">
+                        <option selected>カテゴリ（全て）</option>
+                        <option>食品</option>
+                        <option>日用品</option>
+                        <option>家電</option>
+                        <option>衣料品</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select">
+                        <option selected>在庫状況（全て）</option>
+                        <option>在庫あり</option>
+                        <option>在庫少</option>
+                        <option>在庫切れ</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>商品名</th>
+                        <th>カテゴリ</th>
+                        <th>在庫数</th>
+                        <th>状態</th>
+                        <th>最終入出庫</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>001</td>
+                        <td><a href="product_detail.html">高級ボールペン シルバー</a></td>
+                        <td>文房具</td>
+                        <td>120 個</td>
+                        <td><span class="badge bg-success stock-badge">十分</span></td>
+                        <td>2025/05/01</td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#quickInboundModal" data-product-id="001" data-product-name="高級ボールペン シルバー">
+                                    <i class="bi bi-plus"></i>
+                                </button>
+                                <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#quickOutboundModal" data-product-id="001" data-product-name="高級ボールペン シルバー">
+                                    <i class="bi bi-dash"></i>
+                                </button>
+                                <a href="inventory_history.html" class="btn btn-outline-secondary">
+                                    <i class="bi bi-clock-history"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr class="low-stock">
+                        <td>002</td>
+                        <td><a href="product_detail.html">デスクライト LED</a></td>
+                        <td>家電</td>
+                        <td>5 個</td>
+                        <td><span class="badge bg-warning text-dark stock-badge">少量</span></td>
+                        <td>2025/04/15</td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#quickInboundModal" data-product-id="002" data-product-name="デスクライト LED">
+                                    <i class="bi bi-plus"></i>
+                                </button>
+                                <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#quickOutboundModal" data-product-id="002" data-product-name="デスクライト LED">
+                                    <i class="bi bi-dash"></i>
+                                </button>
+                                <a href="inventory_history.html" class="btn btn-outline-secondary">
+                                    <i class="bi bi-clock-history"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr class="out-of-stock">
+                        <td>003</td>
+                        <td><a href="product_detail.html">ワイヤレスヘッドフォン</a></td>
+                        <td>家電</td>
+                        <td>0 個</td>
+                        <td><span class="badge bg-danger stock-badge">在庫切れ</span></td>
+                        <td>2025/04/10</td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#quickInboundModal" data-product-id="003" data-product-name="ワイヤレスヘッドフォン">
+                                    <i class="bi bi-plus"></i>
+                                </button>
+                                <button class="btn btn-outline-danger disabled" data-bs-toggle="modal" data-bs-target="#quickOutboundModal">
+                                    <i class="bi bi-dash"></i>
+                                </button>
+                                <a href="inventory_history.html" class="btn btn-outline-secondary">
+                                    <i class="bi bi-clock-history"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>004</td>
+                        <td><a href="product_detail.html">オーガニックコーヒー 200g</a></td>
+                        <td>食品</td>
+                        <td>45 個</td>
+                        <td><span class="badge bg-success stock-badge">十分</span></td>
+                        <td>2025/04/28</td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#quickInboundModal" data-product-id="004" data-product-name="オーガニックコーヒー 200g">
+                                    <i class="bi bi-plus"></i>
+                                </button>
+                                <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#quickOutboundModal" data-product-id="004" data-product-name="オーガニックコーヒー 200g">
+                                    <i class="bi bi-dash"></i>
+                                </button>
+                                <a href="inventory_history.html" class="btn btn-outline-secondary">
+                                    <i class="bi bi-clock-history"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>005</td>
+                        <td><a href="product_detail.html">メモ帳 A5サイズ</a></td>
+                        <td>文房具</td>
+                        <td>200 個</td>
+                        <td><span class="badge bg-success stock-badge">十分</span></td>
+                        <td>2025/04/20</td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#quickInboundModal" data-product-id="005" data-product-name="メモ帳 A5サイズ">
+                                    <i class="bi bi-plus"></i>
+                                </button>
+                                <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#quickOutboundModal" data-product-id="005" data-product-name="メモ帳 A5サイズ">
+                                    <i class="bi bi-dash"></i>
+                                </button>
+                                <a href="inventory_history.html" class="btn btn-outline-secondary">
+                                    <i class="bi bi-clock-history"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                表示: 
+                <select class="form-select form-select-sm d-inline-block w-auto">
+                    <option>10</option>
+                    <option selected>25</option>
+                    <option>50</option>
+                    <option>100</option>
+                </select>
+                件 / 全100件
+            </div>
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                    <li class="page-item">
+                        <a class="page-link" href="#" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+    <!-- 入庫登録モーダル -->
+    <div class="modal fade" id="inboundModal" tabindex="-1" aria-labelledby="inboundModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="inboundModalLabel">入庫登録</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label for="inboundProduct" class="form-label">商品</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="inboundProduct" placeholder="商品名または商品IDを入力">
+                                <button class="btn btn-outline-secondary" type="button">検索</button>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="inboundQuantity" class="form-label">入庫数量</label>
+                            <input type="number" class="form-control" id="inboundQuantity" min="1" value="1">
+                        </div>
+                        <div class="mb-3">
+                            <label for="inboundReason" class="form-label">入庫理由</label>
+                            <select class="form-select" id="inboundReason">
+                                <option>通常入荷</option>
+                                <option>返品</option>
+                                <option>在庫調整</option>
+                                <option>その他</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="inboundNote" class="form-label">メモ（任意）</label>
+                            <textarea class="form-control" id="inboundNote" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
+                    <button type="button" class="btn btn-success">入庫登録</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 出庫登録モーダル -->
+    <div class="modal fade" id="outboundModal" tabindex="-1" aria-labelledby="outboundModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="outboundModalLabel">出庫登録</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label for="outboundProduct" class="form-label">商品</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="outboundProduct" placeholder="商品名または商品IDを入力">
+                                <button class="btn btn-outline-secondary" type="button">検索</button>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="outboundQuantity" class="form-label">出庫数量</label>
+                            <input type="number" class="form-control" id="outboundQuantity" min="1" value="1">
+                        </div>
+                        <div class="mb-3">
+                            <label for="outboundReason" class="form-label">出庫理由</label>
+                            <select class="form-select" id="outboundReason">
+                                <option>販売</option>
+                                <option>破損</option>
+                                <option>廃棄</option>
+                                <option>在庫調整</option>
+                                <option>その他</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="outboundNote" class="form-label">メモ（任意）</label>
+                            <textarea class="form-control" id="outboundNote" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
+                    <button type="button" class="btn btn-danger">出庫登録</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- クイック入庫モーダル -->
+    <div class="modal fade" id="quickInboundModal" tabindex="-1" aria-labelledby="quickInboundModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="quickInboundModalLabel">入庫登録</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label class="form-label">商品</label>
+                            <p class="form-control-plaintext" id="quickInboundProductName">高級ボールペン シルバー</p>
+                            <input type="hidden" id="quickInboundProductId" value="001">
+                        </div>
+                        <div class="mb-3">
+                            <label for="quickInboundQuantity" class="form-label">入庫数量</label>
+                            <input type="number" class="form-control" id="quickInboundQuantity" min="1" value="1">
+                        </div>
+                        <div class="mb-3">
+                            <label for="quickInboundReason" class="form-label">入庫理由</label>
+                            <select class="form-select" id="quickInboundReason">
+                                <option>通常入荷</option>
+                                <option>返品</option>
+                                <option>在庫調整</option>
+                                <option>その他</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
+                    <button type="button" class="btn btn-success">登録</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- クイック出庫モーダル -->
+    <div class="modal fade" id="quickOutboundModal" tabindex="-1" aria-labelledby="quickOutboundModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="quickOutboundModalLabel">出庫登録</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label class="form-label">商品</label>
+                            <p class="form-control-plaintext" id="quickOutboundProductName">高級ボールペン シルバー</p>
+                            <input type="hidden" id="quickOutboundProductId" value="001">
+                        </div>
+                        <div class="mb-3">
+                            <label for="quickOutboundQuantity" class="form-label">出庫数量</label>
+                            <input type="number" class="form-control" id="quickOutboundQuantity" min="1" value="1">
+                        </div>
+                        <div class="mb-3">
+                            <label for="quickOutboundReason" class="form-label">出庫理由</label>
+                            <select class="form-select" id="quickOutboundReason">
+                                <option>販売</option>
+                                <option>破損</option>
+                                <option>廃棄</option>
+                                <option>在庫調整</option>
+                                <option>その他</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
+                    <button type="button" class="btn btn-danger">登録</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
