@@ -48,7 +48,7 @@ CREATE TABLE inventory_history (
 
 -- 管理者ユーザーの追加
 INSERT INTO users (username, password, full_name, role, enabled)
-VALUES ('admin', '$2a$10$rJuf3OCQaGLK7O4BGrLBZu.G1QZcfKUOyS28qBOWqWIFRXIlJLu1S', '管理者', 'ADMIN', true);
+VALUES ('admin', '$2a$10$YPYGga1/ClI.V/ctzeDsUuy1rqpUw97o78hGbs7SQPoURKJdPf2sC', '管理者', 'ADMIN', true);
 
 -- カテゴリのサンプルデータ
 INSERT INTO categories (name, description)
