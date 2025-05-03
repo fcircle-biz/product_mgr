@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商品管理システム要件定義書</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #2980b9;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #3498db;
+        }
+        .section {
+            margin-bottom: 30px;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .priority {
+            font-weight: bold;
+        }
+        .priority-high {
+            color: #e74c3c;
+        }
+        .priority-medium {
+            color: #f39c12;
+        }
+        .priority-low {
+            color: #27ae60;
+        }
+    </style>
+</head>
+<body>
+    <h1>商品管理システム要件定義書</h1>
+    
+    <div class="section">
+        <h2>1. はじめに</h2>
+        <h3>1.1 目的</h3>
+        <p>本文書は、商品管理システムの開発に関する要件を定義するものです。商品の登録、更新、検索、および在庫管理を効率的に行うためのシステム要件を明確にします。</p>
+        
+        <h3>1.2 対象範囲</h3>
+        <p>本システムは以下の機能を対象とします：</p>
+        <ul>
+            <li>商品データの登録・更新・削除</li>
+            <li>商品カテゴリ管理</li>
+            <li>在庫管理</li>
+            <li>商品検索</li>
+            <li>レポート生成</li>
+            <li>ユーザー管理</li>
+        </ul>
+    </div>
+    
+    <div class="section">
+        <h2>2. システム概要</h2>
+        <h3>2.1 システム構成</h3>
+        <p>本システムはWebアプリケーションとして実装され、以下のコンポーネントで構成されます：</p>
+        <ul>
+            <li>フロントエンド：HTML, CSS, JavaScript (React.js)</li>
+            <li>バックエンド：Node.js</li>
+            <li>データベース：MySQL</li>
+        </ul>
+        
+        <h3>2.2 利用者</h3>
+        <p>本システムの利用者は以下の通りです：</p>
+        <ul>
+            <li>管理者：システム全体の管理権限を持ちます</li>
+            <li>商品管理者：商品情報の登録・更新権限を持ちます</li>
+            <li>在庫管理者：在庫状況の確認・更新権限を持ちます</li>
+            <li>閲覧者：情報の閲覧のみ可能です</li>
+        </ul>
+    </div>
+    
+    <div class="section">
+        <h2>3. 機能要件</h2>
+        <h3>3.1 商品管理機能</h3>
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>機能名</th>
+                <th>説明</th>
+                <th>優先度</th>
+            </tr>
+            <tr>
+                <td>F-001</td>
+                <td>商品登録</td>
+                <td>新規商品情報を登録する。商品名、商品コード、カテゴリ、価格、説明、画像等の基本情報を入力可能。</td>
+                <td class="priority priority-high">高</td>
+            </tr>
+            <tr>
+                <td>F-002</td>
+                <td>商品情報更新</td>
+                <td>既存の商品情報を更新する。</td>
+                <td class="priority priority-high">高</td>
+            </tr>
+            <tr>
+                <td>F-003</td>
+                <td>商品情報削除</td>
+                <td>商品情報を論理削除する（完全に削除せず、非表示フラグを立てる）。</td>
+                <td class="priority priority-medium">中</td>
+            </tr>
+            <tr>
+                <td>F-004</td>
+                <td>商品情報一覧表示</td>
+                <td>登録されている商品情報を一覧で表示する。ページング機能付き。</td>
+                <td class="priority priority-high">高</td>
+            </tr>
+            <tr>
+                <td>F-005</td>
+                <td>商品詳細表示</td>
+                <td>商品の詳細情報を表示する。</td>
+                <td class="priority priority-high">高</td>
+            </tr>
+        </table>
+        
+        <h3>3.2 カテゴリ管理機能</h3>
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>機能名</th>
+                <th>説明</th>
+                <th>優先度</th>
+            </tr>
+            <tr>
+                <td>F-006</td>
+                <td>カテゴリ登録</td>
+                <td>新規カテゴリを登録する。</td>
+                <td class="priority priority-high">高</td>
+            </tr>
+            <tr>
+                <td>F-007</td>
+                <td>カテゴリ更新</td>
+                <td>既存のカテゴリを更新する。</td>
+                <td class="priority priority-medium">中</td>
+            </tr>
+            <tr>
+                <td>F-008</td>
+                <td>カテゴリ削除</td>
+                <td>カテゴリを削除する（関連商品がある場合は削除不可）。</td>
+                <td class="priority priority-medium">中</td>
+            </tr>
+            <tr>
+                <td>F-009</td>
+                <td>カテゴリ一覧表示</td>
+                <td>カテゴリを一覧で表示する。</td>
+                <td class="priority priority-high">高</td>
+            </tr>
+        </table>
+        
+        <h3>3.3 在庫管理機能</h3>
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>機能名</th>
+                <th>説明</th>
+                <th>優先度</th>
+            </tr>
+            <tr>
+                <td>F-010</td>
+                <td>在庫登録</td>
+                <td>商品の初期在庫数を登録する。</td>
+                <td class="priority priority-high">高</td>
+            </tr>
+            <tr>
+                <td>F-011</td>
+                <td>在庫更新</td>
+                <td>商品の在庫数を増減させる。</td>
+                <td class="priority priority-high">高</td>
+            </tr>
+            <tr>
+                <td>F-012</td>
+                <td>在庫一覧表示</td>
+                <td>全商品の在庫状況を一覧で表示する。</td>
+                <td class="priority priority-high">高</td>
+            </tr>
+            <tr>
+                <td>F-013</td>
+                <td>在庫アラート</td>
+                <td>在庫が設定値を下回った際にアラートを表示する。</td>
+                <td class="priority priority-medium">中</td>
+            </tr>
+        </table>
+        
+        <h3>3.4 検索機能</h3>
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>機能名</th>
+                <th>説明</th>
+                <th>優先度</th>
+            </tr>
+            <tr>
+                <td>F-014</td>
+                <td>商品検索</td>
+                <td>キーワードによる商品検索を行う。商品名、コード、説明文から検索可能。</td>
+                <td class="priority priority-high">高</td>
+            </tr>
+            <tr>
+                <td>F-015</td>
+                <td>カテゴリ検索</td>
+                <td>カテゴリによる商品絞り込みを行う。</td>
+                <td class="priority priority-medium">中</td>
+            </tr>
+            <tr>
+                <td>F-016</td>
+                <td>詳細検索</td>
+                <td>複数条件（価格帯、登録日、在庫状況など）による詳細検索を行う。</td>
+                <td class="priority priority-low">低</td>
+            </tr>
+        </table>
+        
+        <h3>3.5 レポート機能</h3>
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>機能名</th>
+                <th>説明</th>
+                <th>優先度</th>
+            </tr>
+            <tr>
+                <td>F-017</td>
+                <td>在庫状況レポート</td>
+                <td>全商品の在庫状況レポートを生成する。CSVエクスポート可能。</td>
+                <td class="priority priority-medium">中</td>
+            </tr>
+            <tr>
+                <td>F-018</td>
+                <td>入出庫履歴レポート</td>
+                <td>指定期間の入出庫履歴レポートを生成する。CSVエクスポート可能。</td>
+                <td class="priority priority-medium">中</td>
+            </tr>
+        </table>
+        
+        <h3>3.6 ユーザー管理機能</h3>
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>機能名</th>
+                <th>説明</th>
+                <th>優先度</th>
+            </tr>
+            <tr>
+                <td>F-019</td>
+                <td>ユーザー登録</td>
+                <td>システム利用ユーザーを登録する。</td>
+                <td class="priority priority-high">高</td>
+            </tr>
+            <tr>
+                <td>F-020</td>
+                <td>ユーザー更新</td>
+                <td>ユーザー情報を更新する。</td>
+                <td class="priority priority-medium">中</td>
+            </tr>
+            <tr>
+                <td>F-021</td>
+                <td>ユーザー削除</td>
+                <td>ユーザーを削除する（論理削除）。</td>
+                <td class="priority priority-medium">中</td>
+            </tr>
+            <tr>
+                <td>F-022</td>
+                <td>ユーザー一覧表示</td>
+                <td>登録ユーザーを一覧で表示する。</td>
+                <td class="priority priority-medium">中</td>
+            </tr>
+            <tr>
+                <td>F-023</td>
+                <td>ログイン</td>
+                <td>ID・パスワードによるログイン認証を行う。</td>
+                <td class="priority priority-high">高</td>
+            </tr>
+            <tr>
+                <td>F-024</td>
+                <td>ログアウト</td>
+                <td>システムからログアウトする。</td>
+                <td class="priority priority-high">高</td>
+            </tr>
+            <tr>
+                <td>F-025</td>
+                <td>パスワードリセット</td>
+                <td>パスワードを再設定する。</td>
+                <td class="priority priority-medium">中</td>
+            </tr>
+        </table>
+    </div>
+    
+    <div class="section">
+        <h2>4. 非機能要件</h2>
+        <h3>4.1 性能要件</h3>
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>項目</th>
+                <th>要件</th>
+                <th>優先度</th>
+            </tr>
+            <tr>
+                <td>NF-001</td>
+                <td>応答時間</td>
+                <td>一般的な操作の応答時間は3秒以内とする。</td>
+                <td class="priority priority-high">高</td>
+            </tr>
+            <tr>
+                <td>NF-002</td>
+                <td>同時接続数</td>
+                <td>最大50ユーザーの同時接続に対応する。</td>
+                <td class="priority priority-high">高</td>
+            </tr>
+            <tr>
+                <td>NF-003</td>
+                <td>データ処理量</td>
+                <td>最大10万件の商品データを管理可能とする。</td>
+                <td class="priority priority-medium">中</td>
+            </tr>
+        </table>
+        
+        <h3>4.2 セキュリティ要件</h3>
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>項目</th>
+                <th>要件</th>
+                <th>優先度</th>
+            </tr>
+            <tr>
+                <td>NF-004</td>
+                <td>認証</td>
+                <td>ユーザーID・パスワードによる認証を実施する。パスワードは8文字以上、英数字混在とする。</td>
+                <td class="priority priority-high">高</td>
+            </tr>
+            <tr>
+                <td>NF-005</td>
+                <td>権限管理</td>
+                <td>ユーザー種別ごとにアクセス権限を設定し、不正なアクセスを防止する。</td>
+                <td class="priority priority-high">高</td>
+            </tr>
+            <tr>
+                <td>NF-006</td>
+                <td>データ保護</td>
+                <td>通信データはSSL/TLSで暗号化する。パスワードはハッシュ化して保存する。</td>
+                <td class="priority priority-high">高</td>
+            </tr>
+        </table>
+        
+        <h3>4.3 可用性要件</h3>
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>項目</th>
+                <th>要件</th>
+                <th>優先度</th>
+            </tr>
+            <tr>
+                <td>NF-007</td>
+                <td>稼働時間</td>
+                <td>24時間365日の稼働を基本とし、計画的なメンテナンス時間を除き、99.5%以上の可用性を確保する。</td>
+                <td class="priority priority-high">高</td>
+            </tr>
+            <tr>
+                <td>NF-008</td>
+                <td>バックアップ</td>
+                <td>データベースの定期バックアップを実施する（毎日1回）。</td>
+                <td class="priority priority-high">高</td>
+            </tr>
+        </table>
+        
+        <h3>4.4 保守性要件</h3>
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>項目</th>
+                <th>要件</th>
+                <th>優先度</th>
+            </tr>
+            <tr>
+                <td>NF-009</td>
+                <td>拡張性</td>
+                <td>将来的な機能追加やデータ増加に対応できる拡張性を持たせる。</td>
+                <td class="priority priority-medium">中</td>
+            </tr>
+            <tr>
+                <td>NF-010</td>
+                <td>保守性</td>
+                <td>コードの可読性を高め、保守作業が容易になるよう設計する。</td>
+                <td class="priority priority-medium">中</td>
+            </tr>
+        </table>
+    </div>
+    
+    <div class="section">
+        <h2>5. 画面要件</h2>
+        <h3>5.1 画面一覧</h3>
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>画面名</th>
+                <th>説明</th>
+                <th>優先度</th>
+            </tr>
+            <tr>
+                <td>S-001</td>
+                <td>ログイン画面</td>
+                <td>システムへのログイン画面。</td>
+                <td class="priority priority-high">高</td>
+            </tr>
+            <tr>
+                <td>S-002</td>
+                <td>ダッシュボード</td>
+                <td>ログイン後に表示されるトップ画面。全体の状況を把握できる。</td>
+                <td class="priority priority-high">高</td>
+            </tr>
+            <tr>
+                <td>S-003</td>
+                <td>商品一覧画面</td>
+                <td>商品を一覧表示する画面。検索・ソート機能付き。</td>
+                <td class="priority priority-high">高</td>
+            </tr>
+            <tr>
+                <td>S-004</td>
+                <td>商品詳細画面</td>
+                <td>商品の詳細情報を表示する画面。</td>
+                <td class="priority priority-high">高</td>
+            </tr>
+            <tr>
+                <td>S-005</td>
+                <td>商品登録画面</td>
+                <td>商品を新規登録する画面。</td>
+                <td class="priority priority-high">高</td>
+            </tr>
+            <tr>
+                <td>S-006</td>
+                <td>商品編集画面</td>
+                <td>商品情報を編集する画面。</td>
+                <td class="priority priority-high">高</td>
+            </tr>
+            <tr>
+                <td>S-007</td>
+                <td>カテゴリ管理画面</td>
+                <td>カテゴリの登録・編集・削除を行う画面。</td>
+                <td class="priority priority-medium">中</td>
+            </tr>
+            <tr>
+                <td>S-008</td>
+                <td>在庫一覧画面</td>
+                <td>在庫状況を一覧表示する画面。</td>
+                <td class="priority priority-high">高</td>
+            </tr>
+            <tr>
+                <td>S-009</td>
+                <td>在庫更新画面</td>
+                <td>在庫数を更新する画面。入出庫理由も記録可能。</td>
+                <td class="priority priority-high">高</td>
+            </tr>
+            <tr>
+                <td>S-010</td>
+                <td>ユーザー管理画面</td>
+                <td>ユーザーの登録・編集・削除を行う画面。</td>
+                <td class="priority priority-medium">中</td>
+            </tr>
+            <tr>
+                <td>S-011</td>
+                <td>レポート画面</td>
+                <td>各種レポートを生成・表示する画面。</td>
+                <td class="priority priority-medium">中</td>
+            </tr>
+        </table>
+    </div>
+    
+    <div class="section">
+        <h2>6. データベース要件</h2>
+        <h3>6.1 テーブル構成</h3>
+        <p>以下の主要テーブルを設計します：</p>
+        <table>
+            <tr>
+                <th>テーブル名</th>
+                <th>説明</th>
+                <th>主要項目</th>
+            </tr>
+            <tr>
+                <td>products</td>
+                <td>商品マスタテーブル</td>
+                <td>id, code, name, description, price, category_id, image_path, created_at, updated_at, deleted_at</td>
+            </tr>
+            <tr>
+                <td>categories</td>
+                <td>カテゴリマスタテーブル</td>
+                <td>id, name, parent_id, created_at, updated_at</td>
+            </tr>
+            <tr>
+                <td>inventories</td>
+                <td>在庫テーブル</td>
+                <td>id, product_id, quantity, alert_threshold, created_at, updated_at</td>
+            </tr>
+            <tr>
+                <td>inventory_histories</td>
+                <td>在庫履歴テーブル</td>
+                <td>id, product_id, quantity_change, reason, operated_by, created_at</td>
+            </tr>
+            <tr>
+                <td>users</td>
+                <td>ユーザーテーブル</td>
+                <td>id, username, password_hash, email, role, last_login_at, created_at, updated_at, deleted_at</td>
+            </tr>
+        </table>
+    </div>
+    
+    <div class="section">
+        <h2>7. 開発環境・実装環境</h2>
+        <h3>7.1 開発環境</h3>
+        <table>
+            <tr>
+                <th>項目</th>
+                <th>内容</th>
+            </tr>
+            <tr>
+                <td>OS</td>
+                <td>Windows 10/11, macOS, Linux</td>
+            </tr>
+            <tr>
+                <td>開発ツール</td>
+                <td>Visual Studio Code</td>
+            </tr>
+            <tr>
+                <td>バージョン管理</td>
+                <td>Git (GitHub)</td>
+            </tr>
+            <tr>
+                <td>CI/CD</td>
+                <td>GitHub Actions</td>
+            </tr>
+        </table>
+        
+        <h3>7.2 実装環境</h3>
+        <table>
+            <tr>
+                <th>項目</th>
+                <th>内容</th>
+            </tr>
+            <tr>
+                <td>Webサーバー</td>
+                <td>Node.js (Express)</td>
+            </tr>
+            <tr>
+                <td>データベース</td>
+                <td>MySQL 8.0</td>
+            </tr>
+            <tr>
+                <td>フロントエンド</td>
+                <td>React.js, HTML5, CSS3, JavaScript</td>
+            </tr>
+            <tr>
+                <td>デプロイ環境</td>
+                <td>AWS (EC2, RDS)</td>
+            </tr>
+        </table>
+    </div>
+    
+    <div class="section">
+        <h2>8. スケジュール</h2>
+        <table>
+            <tr>
+                <th>工程</th>
+                <th>期間</th>
+                <th>マイルストーン</th>
+            </tr>
+            <tr>
+                <td>要件定義</td>
+                <td>2週間</td>
+                <td>要件定義書承認</td>
+            </tr>
+            <tr>
+                <td>設計</td>
+                <td>3週間</td>
+                <td>基本設計書、詳細設計書承認</td>
+            </tr>
+            <tr>
+                <td>実装</td>
+                <td>8週間</td>
+                <td>コーディング完了</td>
+            </tr>
+            <tr>
+                <td>テスト</td>
+                <td>3週間</td>
+                <td>単体テスト、結合テスト完了</td>
+            </tr>
+            <tr>
+                <td>受入テスト</td>
+                <td>2週間</td>
+                <td>受入テスト完了</td>
+            </tr>
+            <tr>
+                <td>リリース準備</td>
+                <td>1週間</td>
+                <td>本番環境構築完了</td>
+            </tr>
+            <tr>
+                <td>リリース</td>
+                <td>1日</td>
+                <td>本番リリース</td>
+            </tr>
+        </table>
+    </div>
+    
+    <div class="section">
+        <h2>9. 付録</h2>
+        <h3>9.1 用語集</h3>
+        <table>
+            <tr>
+                <th>用語</th>
+                <th>説明</th>
+            </tr>
+            <tr>
+                <td>SKU</td>
+                <td>Stock Keeping Unit（在庫管理単位）。商品を識別するためのコード。</td>
+            </tr>
+            <tr>
+                <td>入出庫</td>
+                <td>商品の入庫（在庫増加）と出庫（在庫減少）を表す用語。</td>
+            </tr>
+            <tr>
+                <td>論理削除</td>
+                <td>データベースから実際に削除せず、削除フラグを立てて表示上は削除されたように見せる方式。</td>
+            </tr>
+        </table>
+    </div>
+    
+    <footer>
+        <p>文書作成日: 2025年5月4日</p>
+        <p>文書管理番号: REQ-001</p>
+        <p>バージョン: 1.0</p>
+    </footer>
+</body>
+</html>

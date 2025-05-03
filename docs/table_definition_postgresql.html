@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商品管理システム テーブル定義書 (PostgreSQL)</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #2980b9;
+            margin-top: 30px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #ddd;
+        }
+        h3 {
+            color: #3498db;
+        }
+        .section {
+            margin-bottom: 30px;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .primary {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        .foreign {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        .nullable {
+            color: #f39c12;
+            font-weight: bold;
+        }
+        .description {
+            font-style: italic;
+            color: #7f8c8d;
+        }
+        .table-info {
+            margin-bottom: 10px;
+        }
+        .toc {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 30px;
+        }
+        .toc ul {
+            list-style-type: none;
+            padding-left: 20px;
+        }
+        .toc li {
+            margin-bottom: 5px;
+        }
+        .toc a {
+            text-decoration: none;
+            color: #3498db;
+        }
+        .toc a:hover {
+            text-decoration: underline;
+        }
+        @media print {
+            .page-break {
+                page-break-before: always;
+            }
+            body {
+                padding: 0;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>商品管理システム テーブル定義書 (PostgreSQL)</h1>
+    
+    <div class="toc">
+        <h3>目次</h3>
+        <ul>
+            <li><a href="#overview">1. 概要</a></li>
+            <li><a href="#table-list">2. テーブル一覧</a></li>
+            <li><a href="#table-definitions">3. テーブル定義</a>
+                <ul>
+                    <li><a href="#products">3.1 商品テーブル (products)</a></li>
+                    <li><a href="#categories">3.2 カテゴリテーブル (categories)</a></li>
+                    <li><a href="#inventories">3.3 在庫テーブル (inventories)</a></li>
+                    <li><a href="#inventory_histories">3.4 在庫履歴テーブル (inventory_histories)</a></li>
+                    <li><a href="#users">3.5 ユーザーテーブル (users)</a></li>
+                </ul>
+            </li>
+            <li><a href="#index-definitions">4. インデックス定義</a></li>
+            <li><a href="#relationship-definitions">5. リレーションシップ定義</a></li>
+        </ul>
+    </div>
+    
+    <div id="overview" class="section">
+        <h2>1. 概要</h2>
+        <p>
+            本書は、商品管理システムで使用するデータベースのテーブル定義を記載したものです。
+            データベースエンジンにはPostgreSQLを使用し、文字コードはUTF-8を採用しています。
+        </p>
+    </div>
+    
+    <div id="table-list" class="section">
+        <h2>2. テーブル一覧</h2>
+        <table>
+            <tr>
+                <th>No.</th>
+                <th>物理名</th>
+                <th>論理名</th>
+                <th>説明</th>
+            </tr>
+            <tr>
+                <td>1</td>
+                <td>products</td>
+                <td>商品</td>
+                <td>商品の基本情報を管理するマスタテーブル</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>categories</td>
+                <td>カテゴリ</td>
+                <td>商品カテゴリを管理するマスタテーブル</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td>inventories</td>
+                <td>在庫</td>
+                <td>商品ごとの在庫数を管理するテーブル</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td>inventory_histories</td>
+                <td>在庫履歴</td>
+                <td>在庫の入出庫履歴を記録するテーブル</td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td>users</td>
+                <td>ユーザー</td>
+                <td>システムのユーザー情報を管理するテーブル</td>
+            </tr>
+        </table>
+    </div>
+    
+    <div id="table-definitions" class="section">
+        <h2>3. テーブル定義</h2>
+        
+        <div id="products" class="section">
+            <h3>3.1 商品テーブル (products)</h3>
+            <div class="table-info">
+                <p><strong>説明：</strong>商品の基本情報を管理するマスタテーブル</p>
+            </div>
+            <table>
+                <tr>
+                    <th>No.</th>
+                    <th>物理名</th>
+                    <th>論理名</th>
+                    <th>データ型</th>
+                    <th>NULL</th>
+                    <th>主キー</th>
+                    <th>外部キー</th>
+                    <th>デフォルト</th>
+                    <th>説明</th>
+                </tr>
+                <tr>
+                    <td>1</td>
+                    <td>id</td>
+                    <td>ID</td>
+                    <td>SERIAL</td>
+                    <td>NO</td>
+                    <td class="primary">PK</td>
+                    <td></td>
+                    <td></td>
+                    <td>商品を一意に識別するID</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>code</td>
+                    <td>商品コード</td>
+                    <td>VARCHAR(50)</td>
+                    <td>NO</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>商品の管理コード（ユニーク制約あり）</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>name</td>
+                    <td>商品名</td>
+                    <td>VARCHAR(100)</td>
+                    <td>NO</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>商品の名称</td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td>description</td>
+                    <td>説明</td>
+                    <td>TEXT</td>
+                    <td>YES</td>
+                    <td></td>
+                    <td></td>
+                    <td>NULL</td>
+                    <td>商品の詳細説明</td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td>price</td>
+                    <td>価格</td>
+                    <td>NUMERIC(10,2)</td>
+                    <td>NO</td>
+                    <td></td>
+                    <td></td>
+                    <td>0.00</td>
+                    <td>商品の価格（税抜）</td>
+                </tr>
+                <tr>
+                    <td>6</td>
+                    <td>category_id</td>
+                    <td>カテゴリID</td>
+                    <td>INTEGER</td>
+                    <td>NO</td>
+                    <td></td>
+                    <td class="foreign">FK (categories.id)</td>
+                    <td></td>
+                    <td>商品が属するカテゴリのID</td>
+                </tr>
+                <tr>
+                    <td>7</td>
+                    <td>image_path</td>
+                    <td>画像パス</td>
+                    <td>VARCHAR(255)</td>
+                    <td>YES</td>
+                    <td></td>
+                    <td></td>
+                    <td>NULL</td>
+                    <td>商品画像のファイルパス</td>
+                </tr>
+                <tr>
+                    <td>8</td>
+                    <td>created_at</td>
+                    <td>作成日時</td>
+                    <td>TIMESTAMP WITH TIME ZONE</td>
+                    <td>NO</td>
+                    <td></td>
+                    <td></td>
+                    <td>CURRENT_TIMESTAMP</td>
+                    <td>レコード作成日時</td>
+                </tr>
+                <tr>
+                    <td>9</td>
+                    <td>updated_at</td>
+                    <td>更新日時</td>
+                    <td>TIMESTAMP WITH TIME ZONE</td>
+                    <td>YES</td>
+                    <td></td>
+                    <td></td>
+                    <td>NULL</td>
+                    <td>レコード更新日時</td>
+                </tr>
+                <tr>
+                    <td>10</td>
+                    <td>deleted_at</td>
+                    <td>削除日時</td>
+                    <td>TIMESTAMP WITH TIME ZONE</td>
+                    <td>YES</td>
+                    <td></td>
+                    <td></td>
+                    <td>NULL</td>
+                    <td>論理削除用のフラグ（NULLでない場合は削除済み）</td>
+                </tr>
+            </table>
+        </div>
+        
+        <div id="categories" class="section">
+            <h3>3.2 カテゴリテーブル (categories)</h3>
+            <div class="table-info">
+                <p><strong>説明：</strong>商品カテゴリを管理するマスタテーブル</p>
+            </div>
+            <table>
+                <tr>
+                    <th>No.</th>
+                    <th>物理名</th>
+                    <th>論理名</th>
+                    <th>データ型</th>
+                    <th>NULL</th>
+                    <th>主キー</th>
+                    <th>外部キー</th>
+                    <th>デフォルト</th>
+                    <th>説明</th>
+                </tr>
+                <tr>
+                    <td>1</td>
+                    <td>id</td>
+                    <td>ID</td>
+                    <td>SERIAL</td>
+                    <td>NO</td>
+                    <td class="primary">PK</td>
+                    <td></td>
+                    <td></td>
+                    <td>カテゴリを一意に識別するID</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>name</td>
+                    <td>カテゴリ名</td>
+                    <td>VARCHAR(50)</td>
+                    <td>NO</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>カテゴリの名称</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>parent_id</td>
+                    <td>親カテゴリID</td>
+                    <td>INTEGER</td>
+                    <td>YES</td>
+                    <td></td>
+                    <td class="foreign">FK (categories.id)</td>
+                    <td>NULL</td>
+                    <td>親カテゴリのID（最上位カテゴリの場合はNULL）</td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td>created_at</td>
+                    <td>作成日時</td>
+                    <td>TIMESTAMP WITH TIME ZONE</td>
+                    <td>NO</td>
+                    <td></td>
+                    <td></td>
+                    <td>CURRENT_TIMESTAMP</td>
+                    <td>レコード作成日時</td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td>updated_at</td>
+                    <td>更新日時</td>
+                    <td>TIMESTAMP WITH TIME ZONE</td>
+                    <td>YES</td>
+                    <td></td>
+                    <td></td>
+                    <td>NULL</td>
+                    <td>レコード更新日時</td>
+                </tr>
+            </table>
+        </div>
+        
+        <div id="inventories" class="section">
+            <h3>3.3 在庫テーブル (inventories)</h3>
+            <div class="table-info">
+                <p><strong>説明：</strong>商品ごとの在庫数を管理するテーブル</p>
+            </div>
+            <table>
+                <tr>
+                    <th>No.</th>
+                    <th>物理名</th>
+                    <th>論理名</th>
+                    <th>データ型</th>
+                    <th>NULL</th>
+                    <th>主キー</th>
+                    <th>外部キー</th>
+                    <th>デフォルト</th>
+                    <th>説明</th>
+                </tr>
+                <tr>
+                    <td>1</td>
+                    <td>id</td>
+                    <td>ID</td>
+                    <td>SERIAL</td>
+                    <td>NO</td>
+                    <td class="primary">PK</td>
+                    <td></td>
+                    <td></td>
+                    <td>在庫レコードを一意に識別するID</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>product_id</td>
+                    <td>商品ID</td>
+                    <td>INTEGER</td>
+                    <td>NO</td>
+                    <td></td>
+                    <td class="foreign">FK (products.id)</td>
+                    <td></td>
+                    <td>在庫を管理する商品のID</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>quantity</td>
+                    <td>数量</td>
+                    <td>INTEGER</td>
+                    <td>NO</td>
+                    <td></td>
+                    <td></td>
+                    <td>0</td>
+                    <td>現在の在庫数</td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td>alert_threshold</td>
+                    <td>警告閾値</td>
+                    <td>INTEGER</td>
+                    <td>NO</td>
+                    <td></td>
+                    <td></td>
+                    <td>10</td>
+                    <td>在庫が少なくなった警告を表示する閾値</td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td>updated_at</td>
+                    <td>更新日時</td>
+                    <td>TIMESTAMP WITH TIME ZONE</td>
+                    <td>NO</td>
+                    <td></td>
+                    <td></td>
+                    <td>CURRENT_TIMESTAMP</td>
+                    <td>在庫更新日時</td>
+                </tr>
+            </table>
+        </div>
+        
+        <div id="inventory_histories" class="section page-break">
+            <h3>3.4 在庫履歴テーブル (inventory_histories)</h3>
+            <div class="table-info">
+                <p><strong>説明：</strong>在庫の入出庫履歴を記録するテーブル</p>
+            </div>
+            <table>
+                <tr>
+                    <th>No.</th>
+                    <th>物理名</th>
+                    <th>論理名</th>
+                    <th>データ型</th>
+                    <th>NULL</th>
+                    <th>主キー</th>
+                    <th>外部キー</th>
+                    <th>デフォルト</th>
+                    <th>説明</th>
+                </tr>
+                <tr>
+                    <td>1</td>
+                    <td>id</td>
+                    <td>ID</td>
+                    <td>SERIAL</td>
+                    <td>NO</td>
+                    <td class="primary">PK</td>
+                    <td></td>
+                    <td></td>
+                    <td>在庫履歴を一意に識別するID</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>product_id</td>
+                    <td>商品ID</td>
+                    <td>INTEGER</td>
+                    <td>NO</td>
+                    <td></td>
+                    <td class="foreign">FK (products.id)</td>
+                    <td></td>
+                    <td>在庫変更が行われた商品のID</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>quantity_change</td>
+                    <td>数量変化</td>
+                    <td>INTEGER</td>
+                    <td>NO</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>在庫の変化量（正の値：入庫、負の値：出庫）</td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td>reason</td>
+                    <td>理由</td>
+                    <td>VARCHAR(255)</td>
+                    <td>YES</td>
+                    <td></td>
+                    <td></td>
+                    <td>NULL</td>
+                    <td>在庫変更の理由</td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td>operated_by</td>
+                    <td>操作者ID</td>
+                    <td>INTEGER</td>
+                    <td>NO</td>
+                    <td></td>
+                    <td class="foreign">FK (users.id)</td>
+                    <td></td>
+                    <td>在庫変更を行ったユーザーのID</td>
+                </tr>
+                <tr>
+                    <td>6</td>
+                    <td>created_at</td>
+                    <td>作成日時</td>
+                    <td>TIMESTAMP WITH TIME ZONE</td>
+                    <td>NO</td>
+                    <td></td>
+                    <td></td>
+                    <td>CURRENT_TIMESTAMP</td>
+                    <td>在庫変更が行われた日時</td>
+                </tr>
+            </table>
+        </div>
+        
+        <div id="users" class="section">
+            <h3>3.5 ユーザーテーブル (users)</h3>
+            <div class="table-info">
+                <p><strong>説明：</strong>システムのユーザー情報を管理するテーブル</p>
+            </div>
+            <table>
+                <tr>
+                    <th>No.</th>
+                    <th>物理名</th>
+                    <th>論理名</th>
+                    <th>データ型</th>
+                    <th>NULL</th>
+                    <th>主キー</th>
+                    <th>外部キー</th>
+                    <th>デフォルト</th>
+                    <th>説明</th>
+                </tr>
+                <tr>
+                    <td>1</td>
+                    <td>id</td>
+                    <td>ID</td>
+                    <td>SERIAL</td>
+                    <td>NO</td>
+                    <td class="primary">PK</td>
+                    <td></td>
+                    <td></td>
+                    <td>ユーザーを一意に識別するID</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>username</td>
+                    <td>ユーザー名</td>
+                    <td>VARCHAR(50)</td>
+                    <td>NO</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>ログイン用のユーザー名</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>password_hash</td>
+                    <td>パスワードハッシュ</td>
+                    <td>VARCHAR(255)</td>
+                    <td>NO</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>ハッシュ化されたパスワード</td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td>email</td>
+                    <td>メールアドレス</td>
+                    <td>VARCHAR(100)</td>
+                    <td>NO</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>ユーザーのメールアドレス（ユニーク制約あり）</td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td>role</td>
+                    <td>権限</td>
+                    <td>user_role</td>
+                    <td>NO</td>
+                    <td></td>
+                    <td></td>
+                    <td>'viewer'</td>
+                    <td>ユーザーの権限レベル（列挙型）</td>
+                </tr>
+                <tr>
+                    <td>6</td>
+                    <td>last_login_at</td>
+                    <td>最終ログイン日時</td>
+                    <td>TIMESTAMP WITH TIME ZONE</td>
+                    <td>YES</td>
+                    <td></td>
+                    <td></td>
+                    <td>NULL</td>
+                    <td>最後にログインした日時</td>
+                </tr>
+                <tr>
+                    <td>7</td>
+                    <td>created_at</td>
+                    <td>作成日時</td>
+                    <td>TIMESTAMP WITH TIME ZONE</td>
+                    <td>NO</td>
+                    <td></td>
+                    <td></td>
+                    <td>CURRENT_TIMESTAMP</td>
+                    <td>ユーザーアカウント作成日時</td>
+                </tr>
+                <tr>
+                    <td>8</td>
+                    <td>updated_at</td>
+                    <td>更新日時</td>
+                    <td>TIMESTAMP WITH TIME ZONE</td>
+                    <td>YES</td>
+                    <td></td>
+                    <td></td>
+                    <td>NULL</td>
+                    <td>ユーザー情報更新日時</td>
+                </tr>
+                <tr>
+                    <td>9</td>
+                    <td>deleted_at</td>
+                    <td>削除日時</td>
+                    <td>TIMESTAMP WITH TIME ZONE</td>
+                    <td>YES</td>
+                    <td></td>
+                    <td></td>
+                    <td>NULL</td>
+                    <td>論理削除用のフラグ（NULLでない場合は削除済み）</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    
+    <div id="index-definitions" class="section page-break">
+        <h2>4. インデックス定義</h2>
+        <table>
+            <tr>
+                <th>No.</th>
+                <th>テーブル名</th>
+                <th>インデックス名</th>
+                <th>カラム</th>
+                <th>種類</th>
+                <th>説明</th>
+            </tr>
+            <tr>
+                <td>1</td>
+                <td>products</td>
+                <td>products_pkey</td>
+                <td>id</td>
+                <td>PRIMARY</td>
+                <td>商品テーブルの主キー</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>products</td>
+                <td>products_code_key</td>
+                <td>code</td>
+                <td>UNIQUE</td>
+                <td>商品コードによる高速検索用</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td>products</td>
+                <td>products_category_id_idx</td>
+                <td>category_id</td>
+                <td>INDEX</td>
+                <td>カテゴリIDによる絞り込み用</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td>products</td>
+                <td>products_name_idx</td>
+                <td>name</td>
+                <td>INDEX</td>
+                <td>商品名による検索用</td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td>products</td>
+                <td>products_deleted_at_idx</td>
+                <td>deleted_at</td>
+                <td>INDEX</td>
+                <td>論理削除フラグによる絞り込み用</td>
+            </tr>
+            <tr>
+                <td>6</td>
+                <td>categories</td>
+                <td>categories_pkey</td>
+                <td>id</td>
+                <td>PRIMARY</td>
+                <td>カテゴリテーブルの主キー</td>
+            </tr>
+            <tr>
+                <td>7</td>
+                <td>categories</td>
+                <td>categories_parent_id_idx</td>
+                <td>parent_id</td>
+                <td>INDEX</td>
+                <td>親カテゴリによる絞り込み用</td>
+            </tr>
+            <tr>
+                <td>8</td>
+                <td>inventories</td>
+                <td>inventories_pkey</td>
+                <td>id</td>
+                <td>PRIMARY</td>
+                <td>在庫テーブルの主キー</td>
+            </tr>
+            <tr>
+                <td>9</td>
+                <td>inventories</td>
+                <td>inventories_product_id_key</td>
+                <td>product_id</td>
+                <td>UNIQUE</td>
+                <td>商品IDによる在庫検索用（一商品につき一つの在庫レコード）</td>
+            </tr>
+            <tr>
+                <td>10</td>
+                <td>inventory_histories</td>
+                <td>inventory_histories_pkey</td>
+                <td>id</td>
+                <td>PRIMARY</td>
+                <td>在庫履歴テーブルの主キー</td>
+            </tr>
+            <tr>
+                <td>11</td>
+                <td>inventory_histories</td>
+                <td>inventory_histories_product_id_idx</td>
+                <td>product_id</td>
+                <td>INDEX</td>
+                <td>商品IDによる履歴検索用</td>
+            </tr>
+            <tr>
+                <td>12</td>
+                <td>inventory_histories</td>
+                <td>inventory_histories_created_at_idx</td>
+                <td>created_at</td>
+                <td>INDEX</td>
+                <td>日時による履歴検索用</td>
+            </tr>
+            <tr>
+                <td>13</td>
+                <td>users</td>
+                <td>users_pkey</td>
+                <td>id</td>
+                <td>PRIMARY</td>
+                <td>ユーザーテーブルの主キー</td>
+            </tr>
+            <tr>
+                <td>14</td>
+                <td>users</td>
+                <td>users_username_key</td>
+                <td>username</td>
+                <td>UNIQUE</td>
+                <td>ユーザー名によるログイン認証用</td>
+            </tr>
+            <tr>
+                <td>15</td>
+                <td>users</td>
+                <td>users_email_key</td>
+                <td>email</td>
+                <td>UNIQUE</td>
+                <td>メールアドレスによるユーザー識別用</td>
+            </tr>
+            <tr>
+                <td>16</td>
+                <td>users</td>
+                <td>users_deleted_at_idx</td>
+                <td>deleted_at</td>
+                <td>INDEX</td>
+                <td>論理削除フラグによる絞り込み用</td>
+            </tr>
+        </table>
+    </div>
+    
+    <div id="relationship-definitions" class="section">
+        <h2>5. リレーションシップ定義</h2>
+        <table>
+            <tr>
+                <th>No.</th>
+                <th>関連元テーブル</th>
+                <th>関連元カラム</th>
+                <th>関連先テーブル</th>
+                <th>関連先カラム</th>
+                <th>関連名</th>
+                <th>カーディナリティ</th>
+                <th>ON DELETE</th>
+                <th>ON UPDATE</th>
+            </tr>
+            <tr>
+                <td>1</td>
+                <td>products</td>
+                <td>category_id</td>
+                <td>categories</td>
+                <td>id</td>
+                <td>products_category_id_fkey</td>
+                <td>多対1</td>
+                <td>RESTRICT</td>
+                <td>CASCADE</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>categories</td>
+                <td>parent_id</td>
+                <td>categories</td>
+                <td>id</td>
+                <td>categories_parent_id_fkey</td>
+                <td>多対1</td>
+                <td>RESTRICT</td>
+                <td>CASCADE</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td>inventories</td>
+                <td>product_id</td>
+                <td>products</td>
+                <td>id</td>
+                <td>inventories_product_id_fkey</td>
+                <td>1対1</td>
+                <td>CASCADE</td>
+                <td>CASCADE</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td>inventory_histories</td>
+                <td>product_id</td>
+                <td>products</td>
+                <td>id</td>
+                <td>inventory_histories_product_id_fkey</td>
+                <td>多対1</td>
+                <td>RESTRICT</td>
+                <td>CASCADE</td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td>inventory_histories</td>
+                <td>operated_by</td>
+                <td>users</td>
+                <td>id</td>
+                <td>inventory_histories_operated_by_fkey</td>
+                <td>多対1</td>
+                <td>RESTRICT</td>
+                <td>CASCADE</td>
+            </tr>
+        </table>
+    </div>
+    
+    <div id="enum-definitions" class="section">
+        <h2>6. 列挙型定義</h2>
+        <table>
+            <tr>
+                <th>No.</th>
+                <th>列挙型名</th>
+                <th>値</th>
+                <th>説明</th>
+            </tr>
+            <tr>
+                <td>1</td>
+                <td>user_role</td>
+                <td>'admin', 'product_mgr', 'inventory_mgr', 'viewer'</td>
+                <td>ユーザーの権限レベルを表す列挙型</td>
+            </tr>
+        </table>
+    </div>
+    
+    <div id="postgresql-scripts" class="section page-break">
+        <h2>7. PostgreSQL作成スクリプト</h2>
+        <pre>
+-- 列挙型の作成
+CREATE TYPE user_role AS ENUM ('admin', 'product_mgr', 'inventory_mgr', 'viewer');
+
+-- カテゴリテーブル
+CREATE TABLE categories (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    parent_id INTEGER REFERENCES categories(id),
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE
+);
+
+CREATE INDEX categories_parent_id_idx ON categories(parent_id);
+
+-- 商品テーブル
+CREATE TABLE products (
+    id SERIAL PRIMARY KEY,
+    code VARCHAR(50) NOT NULL UNIQUE,
+    name VARCHAR(100) NOT NULL,
+    description TEXT,
+    price NUMERIC(10,2) NOT NULL DEFAULT 0.00,
+    category_id INTEGER NOT NULL REFERENCES categories(id),
+    image_path VARCHAR(255),
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE,
+    deleted_at TIMESTAMP WITH TIME ZONE
+);
+
+CREATE INDEX products_category_id_idx ON products(category_id);
+CREATE INDEX products_name_idx ON products(name);
+CREATE INDEX products_deleted_at_idx ON products(deleted_at);
+
+-- ユーザーテーブル
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    role user_role NOT NULL DEFAULT 'viewer',
+    last_login_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE,
+    deleted_at TIMESTAMP WITH TIME ZONE
+);
+
+CREATE INDEX users_deleted_at_idx ON users(deleted_at);
+
+-- 在庫テーブル
+CREATE TABLE inventories (
+    id SERIAL PRIMARY KEY,
+    product_id INTEGER NOT NULL UNIQUE REFERENCES products(id) ON DELETE CASCADE,
+    quantity INTEGER NOT NULL DEFAULT 0,
+    alert_threshold INTEGER NOT NULL DEFAULT 10,
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 在庫履歴テーブル
+CREATE TABLE inventory_histories (
+    id SERIAL PRIMARY KEY,
+    product_id INTEGER NOT NULL REFERENCES products(id),
+    quantity_change INTEGER NOT NULL,
+    reason VARCHAR(255),
+    operated_by INTEGER NOT NULL REFERENCES users(id),
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX inventory_histories_product_id_idx ON inventory_histories(product_id);
+CREATE INDEX inventory_histories_created_at_idx ON inventory_histories(created_at);
+
+-- 更新日時を自動更新する関数とトリガー
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+-- products テーブルの更新トリガー
+CREATE TRIGGER update_products_updated_at
+    BEFORE UPDATE ON products
+    FOR EACH ROW
+    EXECUTE PROCEDURE update_updated_at_column();
+
+-- categories テーブルの更新トリガー
+CREATE TRIGGER update_categories_updated_at
+    BEFORE UPDATE ON categories
+    FOR EACH ROW
+    EXECUTE PROCEDURE update_updated_at_column();
+
+-- users テーブルの更新トリガー
+CREATE TRIGGER update_users_updated_at
+    BEFORE UPDATE ON users
+    FOR EACH ROW
+    EXECUTE PROCEDURE update_updated_at_column();
+        </pre>
+    </div>
+    
+    <footer>
+        <p>文書作成日: 2025年5月4日</p>
+        <p>文書管理番号: DB-DEF-PG-001</p>
+        <p>バージョン: 1.0</p>
+    </footer>
+</body>
+</html>
