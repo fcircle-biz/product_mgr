@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="fragments/layout :: head('在庫警告レポート')">
+    <meta charset="UTF-8">
+    <title>在庫警告レポート</title>
+</head>
+
+<body>
+    <nav th:replace="fragments/layout :: navbar"></nav>
+    
+    <div th:replace="fragments/layout :: messages"></div>
+    
+    <div th:replace="fragments/layout :: breadcrumb(${
+        {{'name': 'レポート', 'url': '/reports'}, {'name': '在庫警告', 'url': '/reports/stock-warning'}}
+    })"></div>
+    
+    <div class="container mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>在庫警告レポート</h2>
+            <div>
+                <a th:href="@{/reports}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> レポート一覧に戻る
+                </a>
+            </div>
+        </div>
+        
+        <!-- 統計サマリー -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card text-white bg-danger mb-3">
+                    <div class="card-header">在庫切れ商品</div>
+                    <div class="card-body">
+                        <h2 class="card-title" th:text="${outOfStockProducts.size() + '件'}">0件</h2>
+                        <p class="card-text">現在在庫がゼロの商品です。早急に対応が必要です。</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card text-dark bg-warning mb-3">
+                    <div class="card-header">在庫少商品</div>
+                    <div class="card-body">
+                        <h2 class="card-title" th:text="${lowStockProducts.size() + '件'}">0件</h2>
+                        <p class="card-text">在庫数が少なくなっている商品です。在庫補充の検討が必要です。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 在庫切れ商品リスト -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">在庫切れ商品</h5>
+                <span class="badge bg-light text-dark" th:text="${'全 ' + outOfStockProducts.size() + ' 件'}">全 0 件</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>商品ID</th>
+                                <th>商品名</th>
+                                <th>JANコード</th>
+                                <th>カテゴリ</th>
+                                <th>在庫数</th>
+                                <th>アクション</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="product : ${outOfStockProducts}">
+                                <td th:text="${product.id}">1</td>
+                                <td>
+                                    <a th:href="@{/products/detail/{id}(id=${product.id})}" th:text="${product.name}">商品名</a>
+                                </td>
+                                <td th:text="${product.janCode}">4901234567890</td>
+                                <td th:text="${product.category != null ? product.category.name : '未分類'}">カテゴリ名</td>
+                                <td>
+                                    <span class="badge bg-danger" th:text="${product.stockQuantity + ' ' + product.stockUnit}">0 個</span>
+                                </td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a th:href="@{/inventory/add?productId={id}(id=${product.id})}" class="btn btn-sm btn-success">
+                                            <i class="bi bi-plus-circle"></i> 入庫
+                                        </a>
+                                        <a th:href="@{/reports/product/{id}(id=${product.id})}" class="btn btn-sm btn-info">
+                                            <i class="bi bi-graph-up"></i> レポート
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${outOfStockProducts.isEmpty()}">
+                                <td colspan="6" class="text-center">在庫切れ商品はありません</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 在庫少商品リスト -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">在庫少商品</h5>
+                <span class="badge bg-light text-dark" th:text="${'全 ' + lowStockProducts.size() + ' 件'}">全 0 件</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>商品ID</th>
+                                <th>商品名</th>
+                                <th>JANコード</th>
+                                <th>カテゴリ</th>
+                                <th>在庫数</th>
+                                <th>アクション</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="product : ${lowStockProducts}">
+                                <td th:text="${product.id}">1</td>
+                                <td>
+                                    <a th:href="@{/products/detail/{id}(id=${product.id})}" th:text="${product.name}">商品名</a>
+                                </td>
+                                <td th:text="${product.janCode}">4901234567890</td>
+                                <td th:text="${product.category != null ? product.category.name : '未分類'}">カテゴリ名</td>
+                                <td>
+                                    <span class="badge bg-warning text-dark" th:text="${product.stockQuantity + ' ' + product.stockUnit}">5 個</span>
+                                </td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a th:href="@{/inventory/add?productId={id}(id=${product.id})}" class="btn btn-sm btn-success">
+                                            <i class="bi bi-plus-circle"></i> 入庫
+                                        </a>
+                                        <a th:href="@{/reports/product/{id}(id=${product.id})}" class="btn btn-sm btn-info">
+                                            <i class="bi bi-graph-up"></i> レポート
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${lowStockProducts.isEmpty()}">
+                                <td colspan="6" class="text-center">在庫少商品はありません</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer th:replace="fragments/layout :: footer"></footer>
+</body>
+</html>

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="fragments/layout :: head('レポートダッシュボード')">
+    <meta charset="UTF-8">
+    <title>レポートダッシュボード</title>
+</head>
+
+<body>
+    <nav th:replace="fragments/layout :: navbar"></nav>
+    
+    <div th:replace="fragments/layout :: messages"></div>
+    
+    <div th:replace="fragments/layout :: breadcrumb(${
+        {{'name': 'レポート', 'url': '/reports'}}
+    })"></div>
+    
+    <div class="container mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>レポートダッシュボード</h2>
+        </div>
+        
+        <!-- レポートタイプ一覧 -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="bi bi-calendar-day text-primary" style="font-size: 2.5rem;"></i>
+                        <h4 class="mt-3 mb-3">日次レポート</h4>
+                        <p class="text-muted">指定した日付の入出庫データを分析します。</p>
+                        <a th:href="@{/reports/daily}" class="btn btn-primary mt-2">表示</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="bi bi-calendar-month text-success" style="font-size: 2.5rem;"></i>
+                        <h4 class="mt-3 mb-3">月次レポート</h4>
+                        <p class="text-muted">指定した月の入出庫データを分析します。</p>
+                        <a th:href="@{/reports/monthly}" class="btn btn-success mt-2">表示</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="bi bi-exclamation-triangle text-warning" style="font-size: 2.5rem;"></i>
+                        <h4 class="mt-3 mb-3">在庫警告</h4>
+                        <p class="text-muted">在庫切れや在庫が少ない商品を確認します。</p>
+                        <a th:href="@{/reports/stock-warning}" class="btn btn-warning mt-2">表示</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="bi bi-pie-chart text-danger" style="font-size: 2.5rem;"></i>
+                        <h4 class="mt-3 mb-3">カテゴリ分布</h4>
+                        <p class="text-muted">カテゴリ別の商品数や在庫数を確認します。</p>
+                        <a th:href="@{/reports/category-distribution}" class="btn btn-danger mt-2">表示</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 在庫概要 -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">在庫概要</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card border-primary mb-3">
+                            <div class="card-body text-center">
+                                <h5 class="card-title text-primary">商品総数</h5>
+                                <p class="display-4" th:text="${totalProducts}">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-warning mb-3">
+                            <div class="card-body text-center">
+                                <h5 class="card-title text-warning">在庫少</h5>
+                                <p class="display-4" th:text="${lowStockCount}">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-danger mb-3">
+                            <div class="card-body text-center">
+                                <h5 class="card-title text-danger">在庫切れ</h5>
+                                <p class="display-4" th:text="${outOfStockCount}">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 本日の取引サマリー -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">本日の取引サマリー</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card border-success mb-3">
+                            <div class="card-body text-center">
+                                <h5 class="card-title text-success">入庫数</h5>
+                                <p class="display-4" th:text="${todayInbound}">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card border-danger mb-3">
+                            <div class="card-body text-center">
+                                <h5 class="card-title text-danger">出庫数</h5>
+                                <p class="display-4" th:text="${todayOutbound}">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center mt-3">
+                    <a th:href="@{/reports/daily}" class="btn btn-primary">本日の詳細レポートを見る</a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 過去7日間の入出庫グラフ -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">過去7日間の入出庫推移</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="weeklyChart" height="300"></canvas>
+            </div>
+        </div>
+        
+        <!-- カテゴリ別商品数 -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">カテゴリ別商品数</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="categoryChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <footer th:replace="fragments/layout :: footer"></footer>
+    
+    <!-- Chart.js の読み込み -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+            // 過去7日間の入出庫グラフ
+            const dateLabels = /*[[${dateLabels}]]*/ [];
+            const inboundData = /*[[${inboundData}]]*/ [];
+            const outboundData = /*[[${outboundData}]]*/ [];
+            
+            new Chart(document.getElementById('weeklyChart'), {
+                type: 'line',
+                data: {
+                    labels: dateLabels,
+                    datasets: [
+                        {
+                            label: '入庫数',
+                            data: inboundData,
+                            fill: false,
+                            borderColor: 'rgb(40, 167, 69)',
+                            tension: 0.1
+                        },
+                        {
+                            label: '出庫数',
+                            data: outboundData,
+                            fill: false,
+                            borderColor: 'rgb(220, 53, 69)',
+                            tension: 0.1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '過去7日間の入出庫推移'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+            
+            // カテゴリ別商品数グラフ
+            const categories = /*[[${categories}]]*/ [];
+            const categoryLabels = categories.map(c => c.name);
+            const categoryData = categories.map(c => {
+                let count = 0;
+                /*[[${products}]]*/.forEach(p => {
+                    if (p.categoryId === c.id) {
+                        count++;
+                    }
+                });
+                return count;
+            });
+            
+            const backgroundColors = [
+                'rgba(54, 162, 235, 0.6)',
+                'rgba(255, 99, 132, 0.6)',
+                'rgba(255, 206, 86, 0.6)',
+                'rgba(75, 192, 192, 0.6)',
+                'rgba(153, 102, 255, 0.6)',
+                'rgba(255, 159, 64, 0.6)',
+                'rgba(199, 199, 199, 0.6)',
+                'rgba(83, 102, 255, 0.6)',
+                'rgba(40, 167, 69, 0.6)',
+                'rgba(0, 123, 255, 0.6)'
+            ];
+            
+            new Chart(document.getElementById('categoryChart'), {
+                type: 'pie',
+                data: {
+                    labels: categoryLabels,
+                    datasets: [{
+                        data: categoryData,
+                        backgroundColor: backgroundColors.slice(0, categoryLabels.length)
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'カテゴリ別商品数'
+                        },
+                        legend: {
+                            position: 'right'
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

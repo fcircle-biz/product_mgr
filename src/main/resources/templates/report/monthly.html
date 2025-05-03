@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="fragments/layout :: head('月次レポート')">
+    <meta charset="UTF-8">
+    <title>月次レポート</title>
+</head>
+
+<body>
+    <nav th:replace="fragments/layout :: navbar"></nav>
+    
+    <div th:replace="fragments/layout :: messages"></div>
+    
+    <div th:replace="fragments/layout :: breadcrumb(${
+        {{'name': 'レポート', 'url': '/reports'}, {'name': '月次レポート', 'url': '/reports/monthly'}}
+    })"></div>
+    
+    <div class="container mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>月次レポート</h2>
+            <div>
+                <a th:href="@{/reports}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> レポート一覧に戻る
+                </a>
+            </div>
+        </div>
+        
+        <!-- 月選択 -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">月選択</h5>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/reports/monthly}" method="get" class="row g-3 align-items-end">
+                    <div class="col-md-4">
+                        <label for="yearMonth" class="form-label">年月</label>
+                        <input type="month" class="form-control" id="yearMonth" name="yearMonth" 
+                               th:value="${yearMonth.toString()}" required>
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-search"></i> 表示
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- 統計サマリー -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0" th:text="${yearMonth.getYear() + '年' + yearMonth.getMonthValue() + '月の取引サマリー'}">2025年5月の取引サマリー</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card bg-light mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title text-success">入庫</h5>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <p class="mb-1">取引件数: <span th:text="${inboundHistories.size()}">0</span>件</p>
+                                        <p class="mb-0">合計数量: <span th:text="${totalInboundCount}">0</span>個</p>
+                                    </div>
+                                    <div class="display-4 text-success" th:text="${totalInboundCount}">0</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card bg-light mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title text-danger">出庫</h5>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <p class="mb-1">取引件数: <span th:text="${outboundHistories.size()}">0</span>件</p>
+                                        <p class="mb-0">合計数量: <span th:text="${totalOutboundCount}">0</span>個</p>
+                                    </div>
+                                    <div class="display-4 text-danger" th:text="${totalOutboundCount}">0</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 日別推移グラフ -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">日別入出庫推移</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="dailyChart" height="300"></canvas>
+            </div>
+        </div>
+        
+        <!-- グラフ表示 -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">入庫理由内訳</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="inboundReasonChart" height="250"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">出庫理由内訳</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="outboundReasonChart" height="250"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 商品別内訳 -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">商品別入庫数</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>商品ID</th>
+                                        <th>商品名</th>
+                                        <th class="text-end">入庫数</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="entry : ${inboundByProduct}">
+                                        <td th:text="${entry.key}">1</td>
+                                        <td>
+                                            <a th:href="@{/reports/product/{id}(id=${entry.key})}" 
+                                               th:text="${productMap.containsKey(entry.key) ? productMap.get(entry.key).name : '不明な商品'}">
+                                                商品名
+                                            </a>
+                                        </td>
+                                        <td class="text-end" th:text="${entry.value}">10</td>
+                                    </tr>
+                                    <tr th:if="${inboundByProduct.isEmpty()}">
+                                        <td colspan="3" class="text-center">データがありません</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="mb-0">商品別出庫数</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>商品ID</th>
+                                        <th>商品名</th>
+                                        <th class="text-end">出庫数</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="entry : ${outboundByProduct}">
+                                        <td th:text="${entry.key}">1</td>
+                                        <td>
+                                            <a th:href="@{/reports/product/{id}(id=${entry.key})}" 
+                                               th:text="${productMap.containsKey(entry.key) ? productMap.get(entry.key).name : '不明な商品'}">
+                                                商品名
+                                            </a>
+                                        </td>
+                                        <td class="text-end" th:text="${entry.value}">10</td>
+                                    </tr>
+                                    <tr th:if="${outboundByProduct.isEmpty()}">
+                                        <td colspan="3" class="text-center">データがありません</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 取引詳細 -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">取引履歴</h5>
+                <span class="badge bg-light text-dark" th:text="${'全 ' + (inboundHistories.size() + outboundHistories.size()) + ' 件'}">全 0 件</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>取引ID</th>
+                                <th>日時</th>
+                                <th>商品</th>
+                                <th>種別</th>
+                                <th>数量</th>
+                                <th>理由</th>
+                                <th>備考</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="history : ${inboundHistories + outboundHistories}" 
+                                th:style="${history.type == '入庫' ? 'background-color: rgba(40, 167, 69, 0.1)' : 'background-color: rgba(220, 53, 69, 0.1)'}">
+                                <td th:text="${history.id}">1</td>
+                                <td th:text="${#temporals.format(history.createdAt, 'MM/dd HH:mm')}">05/04 10:30</td>
+                                <td>
+                                    <a th:href="@{/reports/product/{id}(id=${history.productId})}" 
+                                       th:text="${productMap.containsKey(history.productId) ? productMap.get(history.productId).name : '不明な商品'}">
+                                        商品名
+                                    </a>
+                                </td>
+                                <td>
+                                    <span th:text="${history.type}"
+                                          th:class="${history.type == '入庫' ? 'badge bg-success' : 'badge bg-danger'}">
+                                        入庫
+                                    </span>
+                                </td>
+                                <td th:text="${history.quantity}">10</td>
+                                <td th:text="${history.reason}">通常入荷</td>
+                                <td th:text="${history.note}">備考</td>
+                            </tr>
+                            <tr th:if="${inboundHistories.isEmpty() && outboundHistories.isEmpty()}">
+                                <td colspan="7" class="text-center">データがありません</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer th:replace="fragments/layout :: footer"></footer>
+    
+    <!-- Chart.js の読み込み -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+            // 日別入出庫推移
+            const daysInMonth = /*[[${daysInMonth}]]*/ 31;
+            const inboundByDay = /*[[${inboundByDay}]]*/ {};
+            const outboundByDay = /*[[${outboundByDay}]]*/ {};
+            
+            const labels = Array.from({length: daysInMonth}, (_, i) => i + 1);
+            const inboundData = labels.map(day => inboundByDay[day] || 0);
+            const outboundData = labels.map(day => outboundByDay[day] || 0);
+            
+            new Chart(document.getElementById('dailyChart'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: '入庫数',
+                            data: inboundData,
+                            backgroundColor: 'rgba(40, 167, 69, 0.6)',
+                            borderColor: 'rgba(40, 167, 69, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: '出庫数',
+                            data: outboundData,
+                            backgroundColor: 'rgba(220, 53, 69, 0.6)',
+                            borderColor: 'rgba(220, 53, 69, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '日別入出庫数'
+                        },
+                        legend: {
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: '日'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: '数量'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // 入庫理由内訳グラフ
+            const inboundByReason = /*[[${inboundByReason}]]*/ {};
+            const inboundReasonLabels = Object.keys(inboundByReason);
+            const inboundReasonData = Object.values(inboundByReason);
+            
+            new Chart(document.getElementById('inboundReasonChart'), {
+                type: 'pie',
+                data: {
+                    labels: inboundReasonLabels,
+                    datasets: [{
+                        data: inboundReasonData,
+                        backgroundColor: [
+                            'rgba(40, 167, 69, 0.8)',
+                            'rgba(0, 123, 255, 0.8)',
+                            'rgba(23, 162, 184, 0.8)',
+                            'rgba(108, 117, 125, 0.8)',
+                            'rgba(255, 193, 7, 0.8)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'right'
+                        }
+                    }
+                }
+            });
+            
+            // 出庫理由内訳グラフ
+            const outboundByReason = /*[[${outboundByReason}]]*/ {};
+            const outboundReasonLabels = Object.keys(outboundByReason);
+            const outboundReasonData = Object.values(outboundByReason);
+            
+            new Chart(document.getElementById('outboundReasonChart'), {
+                type: 'pie',
+                data: {
+                    labels: outboundReasonLabels,
+                    datasets: [{
+                        data: outboundReasonData,
+                        backgroundColor: [
+                            'rgba(220, 53, 69, 0.8)',
+                            'rgba(253, 126, 20, 0.8)',
+                            'rgba(255, 193, 7, 0.8)',
+                            'rgba(108, 117, 125, 0.8)',
+                            'rgba(23, 162, 184, 0.8)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'right'
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

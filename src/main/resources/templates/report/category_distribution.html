@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="fragments/layout :: head('カテゴリ分布レポート')">
+    <meta charset="UTF-8">
+    <title>カテゴリ分布レポート</title>
+</head>
+
+<body>
+    <nav th:replace="fragments/layout :: navbar"></nav>
+    
+    <div th:replace="fragments/layout :: messages"></div>
+    
+    <div th:replace="fragments/layout :: breadcrumb(${
+        {{'name': 'レポート', 'url': '/reports'}, {'name': 'カテゴリ分布', 'url': '/reports/category-distribution'}}
+    })"></div>
+    
+    <div class="container mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>カテゴリ分布レポート</h2>
+            <div>
+                <a th:href="@{/reports}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> レポート一覧に戻る
+                </a>
+            </div>
+        </div>
+        
+        <!-- グラフ表示 -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">カテゴリ別商品数</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="productCountChart" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">カテゴリ別在庫数</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="stockCountChart" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- カテゴリ別データ表 -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">カテゴリ別データ</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>カテゴリID</th>
+                                <th>カテゴリ名</th>
+                                <th class="text-end">商品数</th>
+                                <th class="text-end">総在庫数</th>
+                                <th class="text-end">平均在庫数</th>
+                                <th class="text-end">在庫なし商品数</th>
+                                <th class="text-end">在庫少商品数</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="category : ${categories}">
+                                <td th:text="${category.id}">1</td>
+                                <td th:text="${category.name}">カテゴリ名</td>
+                                <td class="text-end" th:with="count=${#lists.size(#objects.nullSafe(products.?[categoryId == category.id], {}))}">
+                                    <span th:text="${count}">0</span>
+                                </td>
+                                <td class="text-end" th:with="totalStock=${#aggregates.sum(#objects.nullSafe(products.?[categoryId == category.id], {}), 'stockQuantity')}">
+                                    <span th:text="${totalStock}">0</span>
+                                </td>
+                                <td class="text-end" th:with="count=${#lists.size(#objects.nullSafe(products.?[categoryId == category.id], {}))},
+                                                           total=${#aggregates.sum(#objects.nullSafe(products.?[categoryId == category.id], {}), 'stockQuantity')},
+                                                           avg=${count > 0 ? total / count : 0}">
+                                    <span th:text="${#numbers.formatDecimal(avg, 1, 1)}">0.0</span>
+                                </td>
+                                <td class="text-end" th:with="count=${#lists.size(#objects.nullSafe(products.?[categoryId == category.id && stockQuantity == 0], {}))}">
+                                    <span th:text="${count}">0</span>
+                                </td>
+                                <td class="text-end" th:with="count=${#lists.size(#objects.nullSafe(products.?[categoryId == category.id && stockQuantity > 0 && stockQuantity <= 10], {}))}">
+                                    <span th:text="${count}">0</span>
+                                </td>
+                            </tr>
+                            <tr th:if="${categories.isEmpty()}">
+                                <td colspan="7" class="text-center">カテゴリがありません</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer th:replace="fragments/layout :: footer"></footer>
+    
+    <!-- Chart.js の読み込み -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+            const categories = /*[[${categories}]]*/ [];
+            const products = /*[[${products}]]*/ [];
+            
+            const categoryLabels = categories.map(c => c.name);
+            
+            // カテゴリ別商品数のデータ
+            const productCountData = categories.map(category => {
+                return products.filter(p => p.categoryId === category.id).length;
+            });
+            
+            // カテゴリ別在庫数のデータ
+            const stockCountData = categories.map(category => {
+                return products
+                    .filter(p => p.categoryId === category.id)
+                    .reduce((sum, p) => sum + p.stockQuantity, 0);
+            });
+            
+            // 商品数グラフ
+            new Chart(document.getElementById('productCountChart'), {
+                type: 'bar',
+                data: {
+                    labels: categoryLabels,
+                    datasets: [{
+                        label: '商品数',
+                        data: productCountData,
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: '商品数'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // 在庫数グラフ
+            new Chart(document.getElementById('stockCountChart'), {
+                type: 'bar',
+                data: {
+                    labels: categoryLabels,
+                    datasets: [{
+                        label: '在庫数',
+                        data: stockCountData,
+                        backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: '在庫数'
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
