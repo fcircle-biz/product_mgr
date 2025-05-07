@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>製品管理システム - ドキュメント</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        h1 {
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        h2 {
+            margin-top: 30px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+        .section {
+            margin-bottom: 40px;
+        }
+        ul {
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .file-type {
+            font-size: 0.8em;
+            color: #7f8c8d;
+            margin-left: 5px;
+        }
+        .description {
+            margin-top: 5px;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <h1>製品管理システム ドキュメント</h1>
+    <p>このページでは製品管理システムの各種ドキュメントへのリンクを提供しています。</p>
+    
+    <div class="section">
+        <h2>仕様書</h2>
+        <ul>
+            <li>
+                <a href="specifications/requirements.html">要件定義書</a>
+                <div class="description">システムの要件と機能仕様について詳細に記述しています。</div>
+            </li>
+        </ul>
+    </div>
+    
+    <div class="section">
+        <h2>データベース設計</h2>
+        <ul>
+            <li>
+                <a href="database/database_design.drawio">データベース設計図 (Draw.io)</a>
+                <div class="description">データベースのER図と設計情報です。</div>
+            </li>
+            <li>
+                <a href="database/database_design_jp.drawio">データベース設計図 (日本語版, Draw.io)</a>
+                <div class="description">日本語表記のデータベース設計図です。</div>
+            </li>
+            <li>
+                <a href="database/table_definition.html">テーブル定義書</a>
+                <div class="description">各テーブルのカラム定義とデータ型の詳細です。</div>
+            </li>
+            <li>
+                <a href="database/table_definition_postgresql.html">テーブル定義書 (PostgreSQL向け)</a>
+                <div class="description">PostgreSQL向けのテーブル定義と特有の機能について記載しています。</div>
+            </li>
+        </ul>
+    </div>
+    
+    <div class="section">
+        <h2>システム設計図</h2>
+        <ul>
+            <li>
+                <a href="diagrams/class_diagram.drawio">クラス図 (Draw.io)</a>
+                <div class="description">システムのクラス構造を図示しています。</div>
+            </li>
+            <li>
+                <a href="diagrams/class_diagram_japanese.drawio">クラス図 (日本語版, Draw.io)</a>
+                <div class="description">日本語表記のクラス図です。</div>
+            </li>
+            <li>
+                <a href="diagrams/screen_transition.drawio">画面遷移図 (Draw.io)</a>
+                <div class="description">システムの画面遷移を図示しています。</div>
+            </li>
+        </ul>
+    </div>
+    
+    <div class="section">
+        <h2>シーケンス図</h2>
+        <ul>
+            <li>
+                <a href="diagrams/sequence_product_create.drawio">商品作成フロー (Draw.io)</a>
+                <div class="description">商品作成時の処理フローを示しています。</div>
+            </li>
+            <li>
+                <a href="diagrams/sequence_product_list.drawio">商品一覧表示フロー (Draw.io)</a>
+                <div class="description">商品一覧表示時の処理フローを示しています。</div>
+            </li>
+            <li>
+                <a href="diagrams/sequence_product_update.drawio">商品更新フロー (Draw.io)</a>
+                <div class="description">商品情報更新時の処理フローを示しています。</div>
+            </li>
+            <li>
+                <a href="diagrams/sequence_inventory_add.drawio">在庫追加フロー (Draw.io)</a>
+                <div class="description">在庫追加処理のフローを示しています。</div>
+            </li>
+            <li>
+                <a href="diagrams/sequence_inventory_subtract.drawio">在庫減少フロー (Draw.io)</a>
+                <div class="description">在庫減少処理のフローを示しています。</div>
+            </li>
+        </ul>
+    </div>
+    
+    <div class="section">
+        <h2>画面モックアップ</h2>
+        <ul>
+            <li>
+                <a href="mockups/index.html">モックアップ一覧</a>
+                <div class="description">すべての画面モックアップを表示します。</div>
+            </li>
+            <li>
+                <a href="mockups/login.html">ログイン画面</a>
+            </li>
+            <li>
+                <a href="mockups/main_menu.html">メインメニュー</a>
+            </li>
+            <li>
+                <a href="mockups/product_list.html">商品一覧画面</a>
+            </li>
+            <li>
+                <a href="mockups/product_detail.html">商品詳細画面</a>
+            </li>
+            <li>
+                <a href="mockups/product_create.html">商品作成画面</a>
+            </li>
+            <li>
+                <a href="mockups/inventory.html">在庫管理画面</a>
+            </li>
+        </ul>
+    </div>
+    
+    <div class="section">
+        <h2>実装ビュー</h2>
+        <ul>
+            <li>
+                <a href="views/index.html">ビュー一覧</a>
+                <div class="description">すべての実装ビューを表示します。</div>
+            </li>
+            <li>
+                <a href="views/login.html">ログイン画面</a>
+            </li>
+            <li>
+                <a href="views/main_menu.html">メインメニュー</a>
+            </li>
+            <li>
+                <a href="views/product_list.html">商品一覧画面</a>
+            </li>
+            <li>
+                <a href="views/product_detail.html">商品詳細画面</a>
+            </li>
+            <li>
+                <a href="views/product_create.html">商品作成画面</a>
+            </li>
+            <li>
+                <a href="views/product_edit.html">商品編集画面</a>
+            </li>
+            <li>
+                <a href="views/inventory.html">在庫管理画面</a>
+            </li>
+            <li>
+                <a href="views/inventory_history.html">在庫履歴画面</a>
+            </li>
+            <li>
+                <a href="views/report.html">レポート画面</a>
+            </li>
+        </ul>
+    </div>
+    
+    <footer style="margin-top: 50px; border-top: 1px solid #eee; padding-top: 20px; text-align: center; color: #7f8c8d;">
+        <p>© 2025 製品管理システム - ドキュメント</p>
+    </footer>
+</body>
+</html>
