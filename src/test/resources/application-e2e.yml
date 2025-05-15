@@ -1,9 +1,13 @@
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5433}/${POSTGRES_DB:productmgr}
+    username: ${POSTGRES_USER:testuser}
+    password: ${POSTGRES_PASSWORD:testpass}
   sql:
     init:
       mode: never
+      schema-locations: classpath:e2e-schema.sql
   security:
     user:
       name: admin

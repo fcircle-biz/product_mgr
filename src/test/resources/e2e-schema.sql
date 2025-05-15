@@ -51,14 +51,16 @@ CREATE TABLE IF NOT EXISTS system_settings (
     key VARCHAR(100) NOT NULL UNIQUE,
     value VARCHAR(500) NOT NULL,
     description TEXT,
+    category VARCHAR(50),
+    data_type VARCHAR(20),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- 初期データ
--- 管理者ユーザー（パスワード: admin123）
+-- 管理者ユーザー（パスワード: admin）
 INSERT INTO users (username, password, full_name, role, enabled)
-VALUES ('admin', '$2a$10$1gDd.53CmR.8XEaL.Y0UXeDhFqJlKCDcAr5RgPgQBvzL2V6mwgLGi', '管理者', 'ADMIN', true);
+VALUES ('admin', '$2a$12$sjRM4ziNZGOElrZrLa3WFeGFgmn4qJNLyMkG/Q8hdHcOvfgiDiIYK', '管理者', 'ADMIN', true);
 
 -- テスト用ユーザー（パスワード: test123）
 INSERT INTO users (username, password, full_name, role, enabled)
@@ -95,13 +97,13 @@ INSERT INTO inventory_histories (product_id, quantity_change, reason, operated_b
 (5, 15, '初期在庫', 1);
 
 -- システム設定
-INSERT INTO system_settings (key, value, description) VALUES
-('company_name', '在庫管理システム', '会社名'),
-('currency_symbol', '¥', '通貨記号'),
-('date_format', 'yyyy-MM-dd', '日付形式'),
-('items_per_page', '20', '1ページあたりの表示件数'),
-('low_stock_threshold', '10', '在庫少警告の閾値'),
-('enable_notifications', 'true', '通知機能の有効化'),
-('business_hours_start', '09:00', '営業開始時間'),
-('business_hours_end', '18:00', '営業終了時間'),
-('tax_rate', '10', '消費税率（%）');
+INSERT INTO system_settings (key, value, description, category, data_type) VALUES
+('company_name', '在庫管理システム', '会社名', 'general', 'STRING'),
+('currency_symbol', '¥', '通貨記号', 'general', 'STRING'),
+('date_format', 'yyyy-MM-dd', '日付形式', 'general', 'STRING'),
+('items_per_page', '20', '1ページあたりの表示件数', 'display', 'INTEGER'),
+('low_stock_threshold', '10', '在庫少警告の閾値', 'inventory', 'INTEGER'),
+('enable_notifications', 'true', '通知機能の有効化', 'notification', 'BOOLEAN'),
+('business_hours_start', '09:00', '営業開始時間', 'business', 'STRING'),
+('business_hours_end', '18:00', '営業終了時間', 'business', 'STRING'),
+('tax_rate', '10', '消費税率（%）', 'finance', 'INTEGER');

@@ -150,33 +150,39 @@ mvn test
 
 ### E2Eテスト
 
-E2Eテストは Selenium WebDriver を使用し、実際のブラウザでアプリケーションを操作してテストを行います。
+E2Eテストは Playwright を使用し、実際のブラウザでアプリケーションを操作してテストを行います。
 
 #### 前提条件
-- Chrome または Firefox ブラウザがインストールされていること
-- WebDriverManagerが自動的に適切なドライバーをダウンロードします
+- Docker が実行されていること
+- Maven がインストールされていること
 
 #### 実行方法
 ```bash
-# Chrome を使用してE2Eテストを実行（デフォルト）
-mvn -Pe2e verify
+# 全てのE2Eテストを実行
+./run-e2e-tests.sh
 
-# Firefox を使用してE2Eテストを実行
-mvn -Pe2e verify -Dselenium.browser=firefox
+# 特定のテストクラスのみ実行（例：認証関連テスト）
+POSTGRES_HOST=localhost POSTGRES_PORT=5434 POSTGRES_DB=productmgr_test POSTGRES_USER=testuser POSTGRES_PASSWORD=testpass mvn -DskipClean=true test -Dtest=com.example.productmgr.e2e.playwright.AuthPlaywrightTest
 
-# 個別のE2Eテストクラスを実行
-mvn -Pe2e verify -Dit.test=AuthE2ETest
+# 特定のテストメソッドのみ実行（例：ログインテスト）
+POSTGRES_HOST=localhost POSTGRES_PORT=5434 POSTGRES_DB=productmgr_test POSTGRES_USER=testuser POSTGRES_PASSWORD=testpass mvn -DskipClean=true test -Dtest=com.example.productmgr.e2e.playwright.AuthPlaywrightTest#testSuccessfulLogin
 
 # CI環境でE2Eテストをスキップ
-CI=true mvn verify
+CI=true mvn test
+```
+
+#### テスト結果の確認
+テスト結果は以下の場所に保存されます：
+```
+target/surefire-reports/
 ```
 
 #### ヘッドレスモード
 デフォルトでE2Eテストはヘッドレスモードで実行されます。これにより、GUIのないサーバー環境でも実行可能です。
 
 #### トラブルシューティング
-- Chrome が見つからない場合: `CHROME_BIN` 環境変数を設定してChromeのパスを指定してください
-- WSL環境の場合: Chrome for Linux をインストールするか、Firefox を使用してください
+- テストがタイムアウトする場合は、`BasePlaywrightTest.java`のタイムアウト設定を調整してください
+- データベース接続に問題がある場合は、PostgreSQLコンテナの状態を確認してください
 
 ## 貢献
 

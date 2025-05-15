@@ -5,7 +5,7 @@
 ## システム概要
 
 - **プロジェクト名**: 在庫管理システム（Product Management System）
-- **技術スタック**: Spring Boot 3.2, PostgreSQL 15, Docker, Thymeleaf, pgAudit
+- **技術スタック**: Spring Boot 3.2, PostgreSQL 15, Docker, Thymeleaf, pgAudit, Playwright（E2Eテスト）
 - **主要機能**: 商品管理、在庫管理、レポート生成、データベース監査
 
 ## 実行手順
@@ -150,7 +150,7 @@ docker exec product-mgr-postgres psql -U productmgr -d productmgr -c "SELECT use
 ### アプリケーション開発
 
 ```bash
-# テスト実行
+# 単体テスト実行
 ./mvnw test
 
 # ビルド
@@ -159,6 +159,77 @@ docker exec product-mgr-postgres psql -U productmgr -d productmgr -c "SELECT use
 # Springコンポーネントの生成（パスワードエンコーダー等）
 ./mvnw spring-boot:run
 ```
+
+### E2Eテスト実行手順
+
+E2Eテスト（End-to-End Test）はPlaywrightを使用して実装されています。Playwrightは自動でブラウザを制御し、ユーザー体験全体をテストします。
+
+#### 前提条件
+
+- Dockerが実行されていること
+- Mavenがインストールされていること
+- ターミナルでコマンドが実行できること
+
+#### テスト環境
+
+E2Eテストは専用の設定とデータベースを使用します：
+- 設定ファイル: `src/test/resources/application-e2e.yml`
+- データベース: PostgreSQLの専用テスト用コンテナ（ポート5434）
+- スキーマ定義: `src/test/resources/e2e-schema.sql`
+
+#### テスト実行手順
+
+1. プロジェクトのルートディレクトリで以下のコマンドを実行します：
+
+```bash
+# E2Eテスト用スクリプトを実行
+./run-e2e-tests.sh
+```
+
+このスクリプトは以下の処理を行います：
+- E2Eテスト用のPostgreSQLコンテナを起動
+- テストデータベーススキーマを初期化
+- Playwrightを使用したE2Eテストを実行
+- テスト終了後にコンテナを停止・削除
+
+2. 特定のテストクラスのみを実行する場合：
+
+```bash
+# 特定のテストクラスのみ実行（例：認証関連テスト）
+POSTGRES_HOST=localhost POSTGRES_PORT=5434 POSTGRES_DB=productmgr_test POSTGRES_USER=testuser POSTGRES_PASSWORD=testpass mvn -DskipClean=true test -Dtest=com.example.productmgr.e2e.playwright.AuthPlaywrightTest
+```
+
+3. 特定のテストメソッドのみを実行する場合：
+
+```bash
+# 特定のテストメソッドのみ実行（例：ログインテスト）
+POSTGRES_HOST=localhost POSTGRES_PORT=5434 POSTGRES_DB=productmgr_test POSTGRES_USER=testuser POSTGRES_PASSWORD=testpass mvn -DskipClean=true test -Dtest=com.example.productmgr.e2e.playwright.AuthPlaywrightTest#testSuccessfulLogin
+```
+
+#### E2Eテスト結果の確認
+
+テスト結果は以下の場所に保存されます：
+```
+target/surefire-reports/
+```
+
+テスト実行中に問題が発生した場合、ログには詳細な情報が出力されます。
+
+#### テストユーザー情報
+
+E2Eテストで使用するユーザー情報：
+- 管理者ユーザー: 
+  - ユーザー名: `admin`
+  - パスワード: `admin`
+- テストユーザー:
+  - ユーザー名: `testuser`
+  - パスワード: `test123`
+
+#### 注意事項
+
+- E2Eテストは統合テストよりも実行時間が長くなります
+- Playwrightはヘッドレスモードで実行されるため、ブラウザの画面は表示されません
+- テストがタイムアウトする場合は、`BasePlaywrightTest.java`のタイムアウト設定を調整してください
 
 ## 設定ファイル
 

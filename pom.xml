@@ -19,6 +19,12 @@
     </properties>
     
     <dependencies>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
         <!-- Spring Boot -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -86,17 +92,11 @@
             <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
-        <!-- Selenium for E2E tests -->
+        <!-- Playwright for E2E tests -->
         <dependency>
-            <groupId>org.seleniumhq.selenium</groupId>
-            <artifactId>selenium-java</artifactId>
-            <version>4.18.1</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.github.bonigarcia</groupId>
-            <artifactId>webdrivermanager</artifactId>
-            <version>5.7.0</version>
+            <groupId>com.microsoft.playwright</groupId>
+            <artifactId>playwright</artifactId>
+            <version>1.44.0</version>
             <scope>test</scope>
         </dependency>
         <!-- Test Containers -->
@@ -136,10 +136,23 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <excludes>
-                        <exclude>**/*E2ETest.java</exclude>
+                        <exclude>**/*PlaywrightTest.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>
@@ -156,10 +169,15 @@
                         <artifactId>maven-failsafe-plugin</artifactId>
                         <configuration>
                             <includes>
-                                <include>**/*E2ETest.java</include>
+                                <include>**/*PlaywrightTest.java</include>
                             </includes>
                             <systemPropertyVariables>
                                 <spring.profiles.active>e2e</spring.profiles.active>
+                                <postgres.host>${env.POSTGRES_HOST}</postgres.host>
+                                <postgres.port>${env.POSTGRES_PORT}</postgres.port>
+                                <postgres.db>${env.POSTGRES_DB}</postgres.db>
+                                <postgres.user>${env.POSTGRES_USER}</postgres.user>
+                                <postgres.password>${env.POSTGRES_PASSWORD}</postgres.password>
                             </systemPropertyVariables>
                         </configuration>
                         <executions>
