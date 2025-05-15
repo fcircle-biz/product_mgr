@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Profile;
 
 @Configuration
 @RequiredArgsConstructor
-@Profile("!test")
+@Profile("!test & !e2e")
 public class ApplicationConfig {
     
     private final SystemSettingService systemSettingService;

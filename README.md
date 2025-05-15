@@ -141,6 +141,43 @@ product_mgr/
 
 当プロジェクトはMITライセンスの下で提供されています。
 
+## テストの実行
+
+### 単体テスト
+```bash
+mvn test
+```
+
+### E2Eテスト
+
+E2Eテストは Selenium WebDriver を使用し、実際のブラウザでアプリケーションを操作してテストを行います。
+
+#### 前提条件
+- Chrome または Firefox ブラウザがインストールされていること
+- WebDriverManagerが自動的に適切なドライバーをダウンロードします
+
+#### 実行方法
+```bash
+# Chrome を使用してE2Eテストを実行（デフォルト）
+mvn -Pe2e verify
+
+# Firefox を使用してE2Eテストを実行
+mvn -Pe2e verify -Dselenium.browser=firefox
+
+# 個別のE2Eテストクラスを実行
+mvn -Pe2e verify -Dit.test=AuthE2ETest
+
+# CI環境でE2Eテストをスキップ
+CI=true mvn verify
+```
+
+#### ヘッドレスモード
+デフォルトでE2Eテストはヘッドレスモードで実行されます。これにより、GUIのないサーバー環境でも実行可能です。
+
+#### トラブルシューティング
+- Chrome が見つからない場合: `CHROME_BIN` 環境変数を設定してChromeのパスを指定してください
+- WSL環境の場合: Chrome for Linux をインストールするか、Firefox を使用してください
+
 ## 貢献
 
 1. このリポジトリをフォークします

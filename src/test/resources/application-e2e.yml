@@ -1,0 +1,21 @@
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+  sql:
+    init:
+      mode: never
+  security:
+    user:
+      name: admin
+      password: admin123
+
+logging:
+  level:
+    org.springframework.web: INFO
+    com.example.productmgr: DEBUG
+
+# E2E テスト用の設定
+server:
+  error:
+    include-message: always
+    include-binding-errors: always
