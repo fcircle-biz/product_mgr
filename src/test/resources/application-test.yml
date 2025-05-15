@@ -1,0 +1,26 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5433/productmgr_test
+    username: productmgr
+    password: productmgr
+    driver-class-name: org.postgresql.Driver
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:test-schema.sql
+      data-locations: classpath:test-data.sql
+  data:
+    jdbc:
+      repositories:
+        enabled: true
+  security:
+    user:
+      name: admin
+      password: admin
+  thymeleaf:
+    cache: false
+
+logging:
+  level:
+    org.springframework.jdbc.core: DEBUG
+    com.example.productmgr: DEBUG

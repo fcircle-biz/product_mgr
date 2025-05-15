@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 
 @Controller
@@ -71,6 +72,7 @@ public class InventoryController {
         model.addAttribute("inventoryHistory", new InventoryHistory());
         model.addAttribute("products", productService.findAll());
         model.addAttribute("type", "入庫");
+        model.addAttribute("reasons", getAddReasons());
         
         return "inventory/add";
     }
@@ -80,6 +82,7 @@ public class InventoryController {
         model.addAttribute("inventoryHistory", new InventoryHistory());
         model.addAttribute("products", productService.findAll());
         model.addAttribute("type", "出庫");
+        model.addAttribute("reasons", getSubtractReasons());
         
         return "inventory/subtract";
     }
@@ -138,5 +141,14 @@ public class InventoryController {
         } catch (Exception e) {
             return "error: " + e.getMessage();
         }
+    }
+    
+    // 定数メソッド
+    private List<String> getAddReasons() {
+        return Arrays.asList("仕入れ", "返品戻し", "在庫調整", "その他");
+    }
+    
+    private List<String> getSubtractReasons() {
+        return Arrays.asList("販売", "廃棄", "在庫調整", "その他");
     }
 }
