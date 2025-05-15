@@ -2,7 +2,9 @@ version: '3.8'
 
 services:
   postgres:
-    image: postgres:15
+    build:
+      context: ./postgres
+      dockerfile: Dockerfile
     container_name: product-mgr-postgres
     ports:
       - "5433:5432"
@@ -13,8 +15,6 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - postgres-logs:/var/log/postgresql
-      - ./postgres/init-pgaudit.sql:/docker-entrypoint-initdb.d/10-init-pgaudit.sql
-      - ./postgres/postgresql.conf:/etc/postgresql/postgresql.conf
     command: postgres -c config_file=/etc/postgresql/postgresql.conf
     networks:
       - product-mgr-network
