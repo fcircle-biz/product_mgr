@@ -1,4 +1,4 @@
-version: '3.8'
+# Docker Compose設定ファイル
 
 services:
   postgres:
@@ -29,6 +29,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        - SKIP_TESTS=true
     container_name: product-mgr-app
     ports:
       - "8080:8080"
@@ -41,6 +43,10 @@ services:
       SPRING_DATASOURCE_PASSWORD: productmgr
     networks:
       - product-mgr-network
+    volumes:
+      - ./src:/app/src
+      - ./target:/app/target
+      - maven-repo:/root/.m2
 
 networks:
   product-mgr-network:
@@ -49,3 +55,4 @@ networks:
 volumes:
   postgres-data:
   postgres-logs:
+  maven-repo:
