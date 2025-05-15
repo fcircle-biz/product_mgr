@@ -130,7 +130,7 @@ product_mgr/
 │   │   ├── service/         # ビジネスロジック
 │   │   └── ProductMgrApplication.java
 │   └── resources/
-│       ├── db/migration/    # Flyway DBマイグレーション
+│       ├── db/              # データベース初期化スクリプト
 │       ├── static/          # 静的リソース
 │       ├── templates/       # Thymeleafテンプレート
 │       └── application.yml  # アプリケーション設定

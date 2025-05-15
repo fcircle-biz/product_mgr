@@ -46,5 +46,6 @@ public class Product {
     private LocalDateTime updatedAt;
     
     // カテゴリは別途結合して取得
+    @org.springframework.data.annotation.Transient
     private Category category;
 }

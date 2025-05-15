@@ -8,16 +8,12 @@ pgAuditは、PostgreSQLの拡張機能で、データベースの操作を詳細
 
 ## アーキテクチャ
 
+pgAudit はPostgreSQLのシステムログに監査情報を記録します：
+
 ```
 PostgreSQL Database
     ↓ (pgAudit logs)
-Audit Log Parser Service
-    ↓ (Scheduled parsing)
-audit_logs テーブル
-    ↓
-Spring Boot Application
-    ↓
-監査ダッシュボード
+PostgreSQL System Logs (/var/log/postgresql/)
 ```
 
 ## セットアップ
@@ -41,23 +37,20 @@ Spring Boot Application
 
 ## 使用方法
 
-### 監査ダッシュボード
+### 監査ログの確認
 
-1. アプリケーションにログイン後、ナビゲーションバーの「監査ログ」をクリック
-2. ダッシュボードで以下の情報を確認：
-   - 総ログ数と期間別の統計
-   - コマンド別使用統計
-   - ユーザー別活動統計
-   - 日別アクティビティグラフ
+pgAuditはPostgreSQLのシステムログに記録されます。以下の方法で確認できます：
 
-### ログ検索
+```bash
+# PostgreSQLログディレクトリを確認
+docker exec product-mgr-postgres ls -la /var/log/postgresql/
 
-1. 「詳細な検索」ボタンをクリック
-2. 検索条件を指定：
-   - ユーザー名
-   - コマンドタイプ（SELECT, INSERT, UPDATE, DELETE等）
-   - 期間（開始日時・終了日時）
-3. 検索結果をページング表示
+# 最新のログファイルを確認
+docker exec product-mgr-postgres tail -n 50 /var/log/postgresql/postgresql-*.csv | grep AUDIT
+
+# ログファイルをCSV形式で読み込み
+docker exec product-mgr-postgres cat /var/log/postgresql/postgresql-*.csv | grep AUDIT
+```
 
 ## 監査対象
 

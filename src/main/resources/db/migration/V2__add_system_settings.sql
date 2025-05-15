@@ -1,9 +1,0 @@
--- システム設定テーブル
-CREATE TABLE system_settings (
-    id SERIAL PRIMARY KEY,
-    key VARCHAR(50) NOT NULL UNIQUE,
-    value TEXT,
-    description VARCHAR(255),
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-);

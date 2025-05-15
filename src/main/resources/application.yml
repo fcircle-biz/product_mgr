@@ -6,10 +6,9 @@ spring:
     username: productmgr
     password: productmgr
     driver-class-name: org.postgresql.Driver
-  flyway:
-    enabled: true
-    baseline-on-migrate: false
-    baseline-version: 0
+  sql:
+    init:
+      mode: never  # 手動でSQLを実行する場合
   data:
     jdbc:
       repositories:
