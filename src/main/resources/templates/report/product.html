@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="fragments/layout :: head('商品別レポート')">
+<head th:replace="~{fragments/layout :: head('商品別レポート')}">
     <meta charset="UTF-8">
     <title>商品別レポート</title>
 </head>
 
 <body>
-    <nav th:replace="fragments/layout :: navbar"></nav>
+    <nav th:replace="~{fragments/layout :: navbar}"></nav>
     
-    <div th:replace="fragments/layout :: messages"></div>
+    <div th:replace="~{fragments/layout :: messages}"></div>
     
-    <div th:replace="fragments/layout :: breadcrumb(${
+    <div th:replace="~{fragments/layout :: breadcrumb(${
         {{'name': 'レポート', 'url': '/reports'}, {'name': '商品別レポート', 'url': '/reports/product/' + product.id}}
     })"></div>
     
@@ -179,7 +179,7 @@
         </div>
     </div>
     
-    <footer th:replace="fragments/layout :: footer"></footer>
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
     
     <!-- Chart.js の読み込み -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

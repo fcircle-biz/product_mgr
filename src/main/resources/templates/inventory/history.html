@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="fragments/layout :: head('在庫履歴')">
+<head th:replace="~{fragments/layout :: head('在庫履歴')}">
     <meta charset="UTF-8">
     <title>在庫履歴</title>
 </head>
 
 <body>
-    <nav th:replace="fragments/layout :: navbar"></nav>
+    <nav th:replace="~{fragments/layout :: navbar}"></nav>
     
-    <div th:replace="fragments/layout :: messages"></div>
+    <div th:replace="~{fragments/layout :: messages}"></div>
     
-    <div th:replace="fragments/layout :: breadcrumb(${
+    <div th:replace="~{fragments/layout :: breadcrumb(${
         {{'name': '在庫管理', 'url': '/inventory'}, {'name': '在庫履歴', 'url': '/inventory/history/' + product.id}}
     })"></div>
     
@@ -98,7 +98,7 @@
         </div>
     </div>
     
-    <footer th:replace="fragments/layout :: footer"></footer>
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
     
     <!-- ApexCharts.js を読み込み -->
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>

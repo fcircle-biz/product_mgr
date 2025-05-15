@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="fragments/layout :: head('在庫サマリーレポート')">
+<head th:replace="~{fragments/layout :: head('在庫サマリーレポート')}">
     <meta charset="UTF-8">
     <title>在庫サマリーレポート</title>
 </head>
 
 <body>
-    <nav th:replace="fragments/layout :: navbar"></nav>
+    <nav th:replace="~{fragments/layout :: navbar}"></nav>
     
-    <div th:replace="fragments/layout :: messages"></div>
+    <div th:replace="~{fragments/layout :: messages}"></div>
     
-    <div th:replace="fragments/layout :: breadcrumb(${
+    <div th:replace="~{fragments/layout :: breadcrumb(${
         {{'name': 'レポート', 'url': '/reports'}, {'name': '在庫サマリー', 'url': ''}}
     })"></div>
     
@@ -136,6 +136,6 @@
         </div>
     </div>
     
-    <footer th:replace="fragments/layout :: footer"></footer>
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>
 </html>

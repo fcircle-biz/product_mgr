@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="fragments/layout :: head('入庫登録')">
+<head th:replace="~{fragments/layout :: head('入庫登録')}">
     <meta charset="UTF-8">
     <title>入庫登録</title>
 </head>
 
 <body>
-    <nav th:replace="fragments/layout :: navbar"></nav>
+    <nav th:replace="~{fragments/layout :: navbar}"></nav>
     
-    <div th:replace="fragments/layout :: messages"></div>
+    <div th:replace="~{fragments/layout :: messages}"></div>
     
-    <div th:replace="fragments/layout :: breadcrumb(${
+    <div th:replace="~{fragments/layout :: breadcrumb(${
         {{'name': '在庫管理', 'url': '/inventory'}, {'name': '入庫登録', 'url': '/inventory/add'}}
     })"></div>
     
@@ -95,7 +95,7 @@
         </div>
     </div>
     
-    <footer th:replace="fragments/layout :: footer"></footer>
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
