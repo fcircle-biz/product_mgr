@@ -2,7 +2,7 @@ spring:
   application:
     name: product-mgr
   datasource:
-    url: jdbc:postgresql://localhost:5432/productmgr
+    url: jdbc:postgresql://localhost:5433/productmgr
     username: productmgr
     password: productmgr
     driver-class-name: org.postgresql.Driver

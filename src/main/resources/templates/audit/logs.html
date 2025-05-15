@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/layout}">
+<head>
+    <title>監査ログ検索</title>
+    <style>
+        .search-form {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+        
+        .log-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .log-table th,
+        .log-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .log-table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+        }
+        
+        .command-tag {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .tag-select { background-color: #17a2b8; color: white; }
+        .tag-insert { background-color: #28a745; color: white; }
+        .tag-update { background-color: #ffc107; color: black; }
+        .tag-delete { background-color: #dc3545; color: white; }
+        .tag-create { background-color: #6f42c1; color: white; }
+        .tag-drop { background-color: #e83e8c; color: white; }
+        .tag-alter { background-color: #fd7e14; color: white; }
+        .tag-default { background-color: #6c757d; color: white; }
+        
+        .query-cell {
+            max-width: 500px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .query-cell:hover {
+            overflow: visible;
+            white-space: normal;
+            position: relative;
+            z-index: 1;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 2rem;
+            gap: 0.5rem;
+        }
+        
+        .pagination a,
+        .pagination span {
+            padding: 0.5rem 1rem;
+            border: 1px solid #dee2e6;
+            text-decoration: none;
+            color: #007bff;
+            border-radius: 4px;
+        }
+        
+        .pagination .active {
+            background-color: #007bff;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container-fluid">
+        <h1>監査ログ検索</h1>
+        
+        <div class="search-form">
+            <form method="get" action="/audit/logs" class="row g-3">
+                <div class="col-md-3">
+                    <label for="userName" class="form-label">ユーザー名</label>
+                    <input type="text" class="form-control" id="userName" name="userName" th:value="${userName}">
+                </div>
+                <div class="col-md-3">
+                    <label for="commandTag" class="form-label">コマンド</label>
+                    <select class="form-control" id="commandTag" name="commandTag">
+                        <option value="">すべて</option>
+                        <option value="SELECT" th:selected="${commandTag == 'SELECT'}">SELECT</option>
+                        <option value="INSERT" th:selected="${commandTag == 'INSERT'}">INSERT</option>
+                        <option value="UPDATE" th:selected="${commandTag == 'UPDATE'}">UPDATE</option>
+                        <option value="DELETE" th:selected="${commandTag == 'DELETE'}">DELETE</option>
+                        <option value="CREATE" th:selected="${commandTag == 'CREATE'}">CREATE</option>
+                        <option value="DROP" th:selected="${commandTag == 'DROP'}">DROP</option>
+                        <option value="ALTER" th:selected="${commandTag == 'ALTER'}">ALTER</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="startTime" class="form-label">開始日時</label>
+                    <input type="datetime-local" class="form-control" id="startTime" name="startTime" th:value="${startTime}">
+                </div>
+                <div class="col-md-3">
+                    <label for="endTime" class="form-label">終了日時</label>
+                    <input type="datetime-local" class="form-control" id="endTime" name="endTime" th:value="${endTime}">
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">検索</button>
+                    <a href="/audit/logs" class="btn btn-secondary">クリア</a>
+                    <a href="/audit" class="btn btn-info">ダッシュボードに戻る</a>
+                </div>
+            </form>
+        </div>
+
+        <div class="result-info mb-3">
+            <strong>検索結果: </strong><span th:text="${totalCount}">0</span> 件
+        </div>
+
+        <div class="table-responsive">
+            <table class="log-table">
+                <thead>
+                    <tr>
+                        <th>時刻</th>
+                        <th>ユーザー</th>
+                        <th>データベース</th>
+                        <th>コマンド</th>
+                        <th>クエリ</th>
+                        <th>接続元</th>
+                        <th>アプリケーション</th>
+                        <th>詳細</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="log : ${logs}">
+                        <td th:text="${#temporals.format(log.logTime, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                        <td th:text="${log.userName}"></td>
+                        <td th:text="${log.databaseName}"></td>
+                        <td>
+                            <span class="command-tag"
+                                  th:classappend="${log.commandTag != null ? 'tag-' + log.commandTag.toLowerCase() : 'tag-default'}"
+                                  th:text="${log.commandTag ?: 'N/A'}"></span>
+                        </td>
+                        <td class="query-cell">
+                            <code th:text="${log.query}"></code>
+                        </td>
+                        <td th:text="${log.connectionFrom}"></td>
+                        <td th:text="${log.applicationName}"></td>
+                        <td>
+                            <button class="btn btn-sm btn-info" onclick="showLogDetail(this)" 
+                                    th:attr="data-log-id=${log.id}">詳細</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pagination" th:if="${totalCount > size}">
+            <a th:href="@{/audit/logs(userName=${userName},commandTag=${commandTag},startTime=${startTime},endTime=${endTime},page=0,size=${size})}"
+               th:classappend="${page == 0 ? 'active' : ''}">最初</a>
+            
+            <a th:if="${page > 0}"
+               th:href="@{/audit/logs(userName=${userName},commandTag=${commandTag},startTime=${startTime},endTime=${endTime},page=${page - 1},size=${size})}">前</a>
+            
+            <span th:text="${page + 1} + ' / ' + ${(totalCount / size) + 1}"></span>
+            
+            <a th:if="${(page + 1) * size < totalCount}"
+               th:href="@{/audit/logs(userName=${userName},commandTag=${commandTag},startTime=${startTime},endTime=${endTime},page=${page + 1},size=${size})}">次</a>
+            
+            <a th:href="@{/audit/logs(userName=${userName},commandTag=${commandTag},startTime=${startTime},endTime=${endTime},page=${(totalCount / size)},size=${size})}"
+               th:classappend="${(page + 1) * size >= totalCount ? 'active' : ''}">最後</a>
+        </div>
+    </div>
+
+    <!-- Log Detail Modal -->
+    <div class="modal fade" id="logDetailModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">ログ詳細</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="logDetailContent">
+                    <!-- Content will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showLogDetail(button) {
+            const logId = button.getAttribute('data-log-id');
+            // Here you would typically fetch log details via AJAX
+            // For now, we'll just show a placeholder
+            const modal = new bootstrap.Modal(document.getElementById('logDetailModal'));
+            document.getElementById('logDetailContent').innerHTML = `
+                <p>ログID: ${logId}</p>
+                <p>詳細な情報はAJAXエンドポイントから取得します。</p>
+            `;
+            modal.show();
+        }
+    </script>
+</div>
+</body>
+</html>

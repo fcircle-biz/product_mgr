@@ -60,6 +60,11 @@
                         </a>
                     </li>
                     <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                        <a class="nav-link" th:href="@{/audit}">
+                            <i class="bi bi-shield-check"></i> 監査ログ
+                        </a>
+                    </li>
+                    <li class="nav-item" sec:authorize="hasRole('ADMIN')">
                         <a class="nav-link" th:href="@{/settings}">
                             <i class="bi bi-gear"></i> 設定
                         </a>

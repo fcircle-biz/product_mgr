@@ -60,3 +60,4 @@ application-prod.properties
 # Database
 *.db
 *.sqlite
+**/.claude/settings.local.json
