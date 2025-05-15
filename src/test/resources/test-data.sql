@@ -1,8 +1,8 @@
 -- テスト用初期データ
 INSERT INTO users (username, password, full_name, role, enabled)
 VALUES 
-    ('testuser', '$2a$12$sjRM4ziNZGOElrZrLa3WFeGFgmn4qJNLyMkG/Q8hdHcOvfgiDiIYK', 'テストユーザー', 'USER', true),
-    ('testadmin', '$2a$12$sjRM4ziNZGOElrZrLa3WFeGFgmn4qJNLyMkG/Q8hdHcOvfgiDiIYK', 'テスト管理者', 'ADMIN', true);
+    ('testuser', '$2a$12$EAiLrpUhvUG2HPvtNu7cwujnaT8mnBRpjcKzuA0jXCdQI90tFiuUS', 'テストユーザー', 'USER', true),
+    ('testadmin', '$2a$12$p.RumIjyXExXnToZtVwtxOGe51/CLUic7rODfP7C4DHstadcX0gjO', 'テスト管理者', 'ADMIN', true);
 
 INSERT INTO categories (name, description)
 VALUES 
