@@ -179,32 +179,37 @@ E2Eテストは専用の設定とデータベースを使用します：
 
 #### テスト実行手順
 
-1. プロジェクトのルートディレクトリで以下のコマンドを実行します：
+1. すべてのE2Eテストを実行する場合：
 
 ```bash
-# E2Eテスト用スクリプトを実行
+# すべてのE2Eテスト用スクリプトを実行
 ./run-e2e-tests.sh
 ```
 
 このスクリプトは以下の処理を行います：
 - E2Eテスト用のPostgreSQLコンテナを起動
 - テストデータベーススキーマを初期化
-- Playwrightを使用したE2Eテストを実行
+- Playwrightを使用したすべてのE2Eテストを実行
 - テスト終了後にコンテナを停止・削除
 
-2. 特定のテストクラスのみを実行する場合：
+2. 機能別（特定のテストクラスやメソッド）のE2Eテストを実行する場合：
 
 ```bash
-# 特定のテストクラスのみ実行（例：認証関連テスト）
-POSTGRES_HOST=localhost POSTGRES_PORT=5434 POSTGRES_DB=productmgr_test POSTGRES_USER=testuser POSTGRES_PASSWORD=testpass mvn -DskipClean=true test -Dtest=com.example.productmgr.e2e.playwright.AuthPlaywrightTest
+# テストクラスのみを指定してテストを実行する場合（例：認証関連テスト）
+./run-single-e2e-test.sh AuthPlaywrightTest
+
+# テストクラスとメソッドを指定してテストを実行する場合（例：ログインテスト）
+./run-single-e2e-test.sh AuthPlaywrightTest#testSuccessfulLogin
 ```
 
-3. 特定のテストメソッドのみを実行する場合：
+`run-single-e2e-test.sh`スクリプトの特徴：
+- 指定したテストクラスやメソッドのみを実行できる
+- テスト環境（PostgreSQLコンテナ）の準備から後片付けまでを自動化
+- 実行結果は`target/surefire-reports/`に保存される
 
-```bash
-# 特定のテストメソッドのみ実行（例：ログインテスト）
-POSTGRES_HOST=localhost POSTGRES_PORT=5434 POSTGRES_DB=productmgr_test POSTGRES_USER=testuser POSTGRES_PASSWORD=testpass mvn -DskipClean=true test -Dtest=com.example.productmgr.e2e.playwright.AuthPlaywrightTest#testSuccessfulLogin
-```
+以下の形式で使用できます：
+- クラス全体: `./run-single-e2e-test.sh <テストクラス名>`
+- 特定のメソッド: `./run-single-e2e-test.sh <テストクラス名>#<メソッド名>`
 
 #### E2Eテスト結果の確認
 

@@ -17,6 +17,7 @@ logging:
   level:
     org.springframework.web: INFO
     com.example.productmgr: DEBUG
+    com.example.productmgr.e2e.playwright: DEBUG
 
 # E2E テスト用の設定
 server:

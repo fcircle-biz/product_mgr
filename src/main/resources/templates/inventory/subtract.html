@@ -11,9 +11,13 @@
     
     <div th:replace="~{fragments/layout :: messages}"></div>
     
-    <div th:replace="~{fragments/layout :: breadcrumb(${
-        {{'name': '在庫管理', 'url': '/inventory'}, {'name': '出庫登録', 'url': '/inventory/subtract'}}
-    })"></div>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/}">メインメニュー</a></li>
+            <li class="breadcrumb-item"><a th:href="@{/inventory}">在庫管理</a></li>
+            <li class="breadcrumb-item active">出庫登録</li>
+        </ol>
+    </nav>
     
     <div class="container mb-5">
         <div class="row justify-content-center">
@@ -32,7 +36,7 @@
                                     <option value="">商品を選択してください</option>
                                     <option th:each="product : ${products}" 
                                             th:value="${product.id}" 
-                                            th:text="${product.name + ' (' + product.stockQuantity + product.stockUnit + '在庫)'}"
+                                            th:text="${product.name + ' (' + product.stockQuantity + ' ' + product.stockUnit + '在庫)'}"
                                             th:data-stock="${product.stockQuantity}">
                                         商品名 (10個在庫)
                                     </option>
@@ -52,13 +56,13 @@
                             </div>
                             
                             <div class="mb-3">
-                                <label for="quantity" class="form-label">数量 <span class="text-danger">*</span></label>
+                                <label for="quantityChange" class="form-label">数量 <span class="text-danger">*</span></label>
                                 <div class="input-group">
-                                    <input type="number" class="form-control" id="quantity" th:field="*{quantity}" min="1" required>
+                                    <input type="number" class="form-control" id="quantityChange" th:field="*{quantityChange}" min="1" required>
                                     <span class="input-group-text">個</span>
                                 </div>
                                 <div class="form-text">出庫する数量を入力してください（在庫数以下）</div>
-                                <div class="invalid-feedback" th:if="${#fields.hasErrors('quantity')}" th:errors="*{quantity}">
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('quantityChange')}" th:errors="*{quantityChange}">
                                     1以上の数値を入力してください
                                 </div>
                             </div>
@@ -67,11 +71,7 @@
                                 <label for="reason" class="form-label">理由 <span class="text-danger">*</span></label>
                                 <select class="form-select" id="reason" th:field="*{reason}" required>
                                     <option value="">選択してください</option>
-                                    <option value="販売">販売</option>
-                                    <option value="不良品">不良品</option>
-                                    <option value="棚卸調整">棚卸調整</option>
-                                    <option value="内部使用">内部使用</option>
-                                    <option value="その他">その他</option>
+                                    <option th:each="reason : ${reasons}" th:value="${reason}" th:text="${reason}">理由</option>
                                 </select>
                                 <div class="form-text">出庫理由を選択してください</div>
                                 <div class="invalid-feedback" th:if="${#fields.hasErrors('reason')}" th:errors="*{reason}">
@@ -111,7 +111,7 @@
             // 商品選択時の処理
             const productSelect = document.getElementById('productId');
             const currentStockInput = document.getElementById('currentStock');
-            const quantityInput = document.getElementById('quantity');
+            const quantityInput = document.getElementById('quantityChange');
             const submitButton = document.getElementById('submitButton');
             
             // 初期状態で在庫数を表示

@@ -92,4 +92,8 @@ public class ProductService {
     public boolean existsById(Long id) {
         return productRepository.existsById(id);
     }
+    
+    public ProductRepository getRepository() {
+        return productRepository;
+    }
 }

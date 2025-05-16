@@ -6,6 +6,7 @@ import com.example.productmgr.service.InventoryService;
 import com.example.productmgr.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Controller;
@@ -21,6 +22,7 @@ import java.util.List;
 @Controller
 @RequestMapping("/inventory")
 @RequiredArgsConstructor
+@Slf4j
 public class InventoryController {
 
     private final ProductService productService;
@@ -31,27 +33,85 @@ public class InventoryController {
                                 @RequestParam(required = false) Long categoryId,
                                 @RequestParam(required = false) String stockStatus,
                                 Model model) {
+        log.info("listInventory method called with params: keyword={}, categoryId={}, stockStatus={}", 
+                keyword, categoryId, stockStatus);
+                
         List<Product> products;
         
-        if (keyword != null && !keyword.isEmpty()) {
-            products = productService.searchByKeyword(keyword);
-            model.addAttribute("searchKeyword", keyword);
-        } else if (categoryId != null) {
-            products = productService.findByCategoryId(categoryId);
-            model.addAttribute("selectedCategoryId", categoryId);
-        } else if ("out_of_stock".equals(stockStatus)) {
-            products = productService.findOutOfStock();
-            model.addAttribute("selectedStockStatus", stockStatus);
-        } else if ("low_stock".equals(stockStatus)) {
-            products = productService.findLowStock();
-            model.addAttribute("selectedStockStatus", stockStatus);
-        } else {
-            products = productService.findAll();
+        try {
+            if (keyword != null && !keyword.isEmpty()) {
+                log.info("Searching products by keyword: {}", keyword);
+                products = productService.searchByKeyword(keyword);
+                model.addAttribute("searchKeyword", keyword);
+            } else if (categoryId != null) {
+                log.info("Finding products by categoryId: {}", categoryId);
+                products = productService.findByCategoryId(categoryId);
+                model.addAttribute("selectedCategoryId", categoryId);
+            } else if ("out_of_stock".equals(stockStatus)) {
+                log.info("Finding out of stock products");
+                products = productService.findOutOfStock();
+                model.addAttribute("selectedStockStatus", stockStatus);
+            } else if ("low_stock".equals(stockStatus)) {
+                log.info("Finding low stock products");
+                products = productService.findLowStock();
+                model.addAttribute("selectedStockStatus", stockStatus);
+            } else {
+                log.info("Finding all products");
+                products = productService.findAll();
+            }
+            
+            log.info("Found {} products", products.size());
+            model.addAttribute("products", products);
+            log.info("Model populated with products attribute");
+            
+            return "inventory/list";
+        } catch (Exception e) {
+            log.error("Error in listInventory method", e);
+            model.addAttribute("errorMessage", "在庫一覧の取得中にエラーが発生しました: " + e.getMessage());
+            model.addAttribute("products", List.of());
+            return "inventory/list";
         }
+    }
+    
+    @GetMapping("/debug-info")
+    @ResponseBody
+    public String debugInfo() {
+        StringBuilder info = new StringBuilder();
+        info.append("==== Inventory Debug Info ===\n");
         
-        model.addAttribute("products", products);
-        
-        return "inventory/list";
+        try {
+            int totalCount = productService.getRepository().countAllProducts();
+            info.append("Direct count query result: ").append(totalCount).append("\n");
+            
+            List<Product> products = productService.findAll();
+            info.append("Total products: ").append(products.size()).append("\n");
+            
+            // データベース接続情報を取得
+            info.append("\nDatabase Connection Info:\n");
+            info.append("Active profile: ").append(System.getProperty("spring.profiles.active", "default")).append("\n");
+            
+            // 最初の5つの商品情報を表示
+            info.append("\nFirst 5 products:\n");
+            products.stream().limit(5).forEach(p -> {
+                info.append(String.format("ID: %d, Name: %s, Stock: %d %s\n", 
+                        p.getId(), p.getName(), p.getStockQuantity(), p.getStockUnit()));
+            });
+            
+            // カテゴリ情報も確認
+            info.append("\nCategory Info:\n");
+            products.stream().limit(5).forEach(p -> {
+                if (p.getCategory() != null) {
+                    info.append(String.format("Product ID: %d, Category ID: %d, Category Name: %s\n", 
+                            p.getId(), p.getCategory().getId(), p.getCategory().getName()));
+                } else {
+                    info.append(String.format("Product ID: %d, Category: null\n", p.getId()));
+                }
+            });
+            
+            return info.toString();
+        } catch (Exception e) {
+            return "ERROR: " + e.getMessage() + "\n" + e.getStackTrace()[0] + "\n" + e.getStackTrace()[1];
+        }
     }
     
     @GetMapping("/history/{productId}")

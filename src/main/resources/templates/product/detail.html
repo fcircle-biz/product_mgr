@@ -149,7 +149,7 @@
             <a th:href="@{/products}" class="btn btn-outline-secondary">
                 <i class="bi bi-arrow-left"></i> 一覧へ戻る
             </a>
-            <a th:href="@{/inventory/{id}(id=${product.id})}" class="btn btn-primary">
+            <a th:href="@{/inventory/{id}(id=${product.id})}" class="btn btn-primary" id="inventory-action-button">
                 <i class="bi bi-box-arrow-in-down"></i> 入出庫処理
             </a>
         </div>

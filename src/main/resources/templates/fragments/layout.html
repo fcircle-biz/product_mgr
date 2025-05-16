@@ -89,17 +89,17 @@
         </div>
     </div>
 
-    <div th:fragment="breadcrumb(items)" class="container mt-3">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a th:href="@{/}">メインメニュー</a></li>
-                <li class="breadcrumb-item" th:each="item, status : ${items}" th:class="${status.last ? 'breadcrumb-item active' : 'breadcrumb-item'}">
-                    <a th:if="${!status.last}" th:href="${item.url}" th:text="${item.name}">項目名</a>
-                    <span th:if="${status.last}" th:text="${item.name}">現在の項目名</span>
-                </li>
-            </ol>
-        </nav>
-    </div>
+    <nav th:fragment="breadcrumb(items)" aria-label="breadcrumb" class="container mt-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/}">メインメニュー</a></li>
+            <!-- Simple fixed implementation - remove complex template syntax -->
+            <li class="breadcrumb-item" th:if="${items != null and items.size() > 0}">
+                <a th:if="${items[0].url != null}" th:href="${items[0].url}" th:text="${items[0].name}">項目名</a>
+                <span th:if="${items[0].url == null}" th:text="${items[0].name}">現在の項目名</span>
+            </li>
+            <li class="breadcrumb-item active" th:if="${items != null and items.size() > 1}" th:text="${items[1].name}">現在の項目名</li>
+        </ol>
+    </nav>
 
     <footer th:fragment="footer" class="container mt-5 mb-3">
         <hr>
