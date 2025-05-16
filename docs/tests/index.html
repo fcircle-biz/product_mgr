@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商品管理システム E2Eテスト仕様書</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #2980b9;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #3498db;
+            margin-top: 25px;
+        }
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .card {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: calc(50% - 20px);
+            transition: transform 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        .card h3 {
+            color: #3498db;
+            margin-top: 0;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .card-content {
+            margin-bottom: 15px;
+        }
+        .card-link {
+            display: inline-block;
+            background-color: #3498db;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 4px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+        .card-link:hover {
+            background-color: #2980b9;
+        }
+        .intro {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        .intro p {
+            margin: 10px 0;
+        }
+        .highlight {
+            background-color: #fff8e1;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #ffc107;
+        }
+        .footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            text-align: center;
+            font-size: 0.9em;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <h1>商品管理システム E2Eテスト仕様書</h1>
+    
+    <div class="intro">
+        <h2>概要</h2>
+        <p>
+            このドキュメントは、商品管理システムのEnd-to-End（E2E）テスト仕様をまとめたものです。
+            E2Eテストでは、ユーザーの実際の操作に近い形でアプリケーションの一連の機能が正常に動作することを確認します。
+        </p>
+        <p>
+            本システムのE2Eテストは、Playwrightを使用して実装されており、各機能領域ごとに個別のテスト仕様書が用意されています。
+        </p>
+    </div>
+    
+    <h2>テスト領域</h2>
+    
+    <div class="card-container">
+        <div class="card">
+            <h3>認証機能</h3>
+            <div class="card-content">
+                <p>ログイン・ログアウト機能および認証エラー処理のテスト仕様です。</p>
+                <ul>
+                    <li>ログイン成功テスト</li>
+                    <li>ログイン失敗テスト</li>
+                    <li>ログアウトテスト</li>
+                </ul>
+            </div>
+            <a href="auth_e2e_test.html" class="card-link">詳細を見る</a>
+        </div>
+        
+        <div class="card">
+            <h3>商品管理</h3>
+            <div class="card-content">
+                <p>商品のCRUD操作および検索機能のテスト仕様です。</p>
+                <ul>
+                    <li>商品一覧表示テスト</li>
+                    <li>商品新規登録テスト</li>
+                    <li>商品詳細表示テスト</li>
+                    <li>商品編集テスト</li>
+                    <li>商品検索テスト</li>
+                </ul>
+            </div>
+            <a href="product_e2e_test.html" class="card-link">詳細を見る</a>
+        </div>
+        
+        <div class="card">
+            <h3>在庫管理</h3>
+            <div class="card-content">
+                <p>在庫の追加・削減および履歴表示機能のテスト仕様です。</p>
+                <ul>
+                    <li>在庫一覧表示テスト</li>
+                    <li>在庫追加テスト</li>
+                    <li>在庫削減テスト</li>
+                    <li>在庫履歴表示テスト</li>
+                </ul>
+            </div>
+            <a href="inventory_e2e_test.html" class="card-link">詳細を見る</a>
+        </div>
+        
+        <div class="card">
+            <h3>カテゴリ管理</h3>
+            <div class="card-content">
+                <p>商品カテゴリのCRUD操作のテスト仕様です。</p>
+                <ul>
+                    <li>カテゴリ一覧表示テスト</li>
+                    <li>カテゴリ新規登録テスト</li>
+                    <li>カテゴリ編集テスト</li>
+                    <li>カテゴリ削除テスト</li>
+                </ul>
+            </div>
+            <a href="category_e2e_test.html" class="card-link">詳細を見る</a>
+        </div>
+        
+        <div class="card">
+            <h3>レポート機能</h3>
+            <div class="card-content">
+                <p>各種レポート機能およびアクセス制御のテスト仕様です。</p>
+                <ul>
+                    <li>レポートアクセス制御テスト</li>
+                    <li>各種レポートページアクセステスト</li>
+                    <li>レポートデータ表示テスト</li>
+                </ul>
+            </div>
+            <a href="report_e2e_test.html" class="card-link">詳細を見る</a>
+        </div>
+        
+        <div class="card">
+            <h3>PgAudit監視機能</h3>
+            <div class="card-content">
+                <p>データベース監査ログ記録のテスト仕様です。</p>
+                <ul>
+                    <li>データ操作監査テスト</li>
+                    <li>認証監査テスト</li>
+                </ul>
+            </div>
+            <a href="pgaudit_e2e_test.html" class="card-link">詳細を見る</a>
+        </div>
+        
+        <div class="card">
+            <h3>設定機能</h3>
+            <div class="card-content">
+                <p>システム設定機能およびアクセス制御のテスト仕様です。</p>
+                <ul>
+                    <li>設定ページアクセステスト</li>
+                    <li>設定ページアクセス制御テスト</li>
+                </ul>
+            </div>
+            <a href="settings_e2e_test.html" class="card-link">詳細を見る</a>
+        </div>
+    </div>
+    
+    <div class="highlight">
+        <h2>E2Eテストの実行方法</h2>
+        <p>テストは以下のコマンドで実行できます：</p>
+        <pre>./run-e2e-tests.sh</pre>
+        
+        <p>特定のテストクラスのみを実行する場合：</p>
+        <pre>POSTGRES_HOST=localhost POSTGRES_PORT=5434 POSTGRES_DB=productmgr_test POSTGRES_USER=testuser POSTGRES_PASSWORD=testpass mvn -DskipClean=true test -Dtest=com.example.productmgr.e2e.playwright.ProductPlaywrightTest</pre>
+        
+        <p>テスト実行結果は <code>target/surefire-reports/</code> ディレクトリに出力されます。</p>
+    </div>
+    
+    <h2>テスト開発ガイドライン</h2>
+    
+    <h3>テスト実装の基本原則</h3>
+    
+    <ol>
+        <li><strong>独立性の確保</strong>: 各テストは他のテストに依存せず、単独で実行できるようにします。テストごとにデータを自動生成します。</li>
+        <li><strong>明確な検証ポイント</strong>: 各テストには明確な検証ポイントを設け、アサーションを適切に設定します。</li>
+        <li><strong>安定したセレクタの使用</strong>: HTMLの構造変更に強いセレクタを使用し、必要に応じてタイムアウト値を設定します。</li>
+        <li><strong>エラー診断情報の提供</strong>: テスト失敗時にデバッグしやすいよう、適切なメッセージを出力します。</li>
+        <li><strong>一貫したテスト命名規則</strong>: テストメソッド名は <code>test + テスト対象機能</code> の形式で命名します。</li>
+    </ol>
+    
+    <h3>テストコードの品質維持</h3>
+    
+    <ul>
+        <li>新機能開発時には、対応するE2Eテストも追加・更新します。</li>
+        <li>UIの変更があった場合は、関連するテスト（特にセレクタ）を更新します。</li>
+        <li>テストが不安定な場合は、タイムアウト値やセレクタを見直します。</li>
+        <li>テストのパフォーマンスを定期的に見直し、必要に応じて最適化します。</li>
+    </ul>
+    
+    <div class="footer">
+        <p>商品管理システム E2Eテスト仕様書 © 2025</p>
+    </div>
+</body>
+</html>

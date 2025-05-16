@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商品管理 E2Eテスト仕様書</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #2980b9;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #3498db;
+            margin-top: 25px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        code {
+            background-color: #f8f8f8;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: Monaco, Consolas, 'Courier New', monospace;
+            color: #e74c3c;
+            font-size: 0.9em;
+        }
+        pre {
+            background-color: #f8f8f8;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            line-height: 1.4;
+        }
+        .note {
+            background-color: #ffffcc;
+            padding: 10px 15px;
+            border-left: 4px solid #ffcc00;
+            margin: 15px 0;
+        }
+        .important {
+            background-color: #ffe6e6;
+            padding: 10px 15px;
+            border-left: 4px solid #ff3333;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>商品管理 E2Eテスト仕様書</h1>
+    
+    <p>本ドキュメントでは、商品管理システムにおける商品管理機能のEnd-to-End（E2E）テスト仕様を定義します。</p>
+    
+    <h2>1. テスト概要</h2>
+    
+    <p>商品管理機能のE2Eテストでは、以下の機能が正常に動作することを確認します。</p>
+    
+    <ul>
+        <li>商品一覧の表示</li>
+        <li>商品の新規登録</li>
+        <li>商品の詳細表示</li>
+        <li>商品情報の編集</li>
+        <li>商品検索</li>
+    </ul>
+    
+    <h2>2. テスト環境</h2>
+    
+    <h3>2.1 必要環境</h3>
+    
+    <ul>
+        <li>Java 17以上</li>
+        <li>Maven 3.6以上</li>
+        <li>Docker および Docker Compose</li>
+        <li>Playwright（自動的にダウンロードされます）</li>
+    </ul>
+    
+    <h3>2.2 テスト実行方法</h3>
+    
+    <p>テストは以下のコマンドで実行できます：</p>
+    
+    <pre>
+./run-e2e-tests.sh
+</pre>
+    
+    <p>特定のテストクラスのみを実行する場合：</p>
+    
+    <pre>
+POSTGRES_HOST=localhost POSTGRES_PORT=5434 POSTGRES_DB=productmgr_test POSTGRES_USER=testuser POSTGRES_PASSWORD=testpass mvn -DskipClean=true test -Dtest=com.example.productmgr.e2e.playwright.ProductPlaywrightTest
+</pre>
+    
+    <div class="note">
+        <p><strong>注意：</strong> テスト実行前にDockerが起動していることを確認してください。</p>
+    </div>
+    
+    <h2>3. テストケース</h2>
+    
+    <h3>3.1 商品一覧表示テスト（testProductList）</h3>
+    
+    <table>
+        <tr>
+            <th width="20%">テスト項目</th>
+            <td>商品一覧ページの表示確認</td>
+        </tr>
+        <tr>
+            <th>前提条件</th>
+            <td>ユーザーがログイン済みであること</td>
+        </tr>
+        <tr>
+            <th>テスト手順</th>
+            <td>
+                <ol>
+                    <li>商品一覧ページ（/products）にアクセスする</li>
+                    <li>ページのロードが完了するまで待機する</li>
+                    <li>ページタイトルが表示されるまで待機する</li>
+                </ol>
+            </td>
+        </tr>
+        <tr>
+            <th>期待結果</th>
+            <td>
+                <ul>
+                    <li>ページタイトルが「商品一覧」と表示されること</li>
+                    <li>商品テーブルが表示されること</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <th>自動化ポイント</th>
+            <td>
+                <ul>
+                    <li>セレクタ <code>h2</code> でページタイトルを検証</li>
+                    <li><code>table</code> 要素の存在確認</li>
+                </ul>
+            </td>
+        </tr>
+    </table>
+    
+    <h3>3.2 商品新規登録テスト（testCreateProduct）</h3>
+    
+    <table>
+        <tr>
+            <th width="20%">テスト項目</th>
+            <td>新規商品の登録機能確認</td>
+        </tr>
+        <tr>
+            <th>前提条件</th>
+            <td>ユーザーがログイン済みであること</td>
+        </tr>
+        <tr>
+            <th>テスト手順</th>
+            <td>
+                <ol>
+                    <li>商品登録ページ（/products/new）にアクセスする</li>
+                    <li>フォームタイトルが表示されるまで待機する</li>
+                    <li>一意の商品名を生成する</li>
+                    <li>商品名、価格、在庫数量を入力する</li>
+                    <li>カテゴリを選択する</li>
+                    <li>送信ボタンをクリックする</li>
+                </ol>
+            </td>
+        </tr>
+        <tr>
+            <th>期待結果</th>
+            <td>
+                <ul>
+                    <li>商品詳細ページにリダイレクトされること</li>
+                    <li>作成した商品情報が表示されること</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <th>自動化ポイント</th>
+            <td>
+                <ul>
+                    <li>一意の商品名生成: <code>String uniqueProductName = "テスト" + System.currentTimeMillis() % 10000;</code></li>
+                    <li>フォーム入力: <code>page.fill("input[name=name]", uniqueProductName);</code></li>
+                    <li>カテゴリ選択: <code>categorySelect.selectOption(new SelectOption().setIndex(1));</code></li>
+                    <li>URL遷移確認: <code>page.waitForURL("**/products/*", ...);</code></li>
+                </ul>
+            </td>
+        </tr>
+    </table>
+    
+    <h3>3.3 商品編集テスト（testEditProduct）</h3>
+    
+    <table>
+        <tr>
+            <th width="20%">テスト項目</th>
+            <td>商品情報編集機能確認</td>
+        </tr>
+        <tr>
+            <th>前提条件</th>
+            <td>
+                <ul>
+                    <li>ユーザーがログイン済みであること</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <th>テスト手順</th>
+            <td>
+                <ol>
+                    <li>商品登録ページで新しい商品を作成する（データ独立性確保）</li>
+                    <li>商品詳細ページに遷移したことを確認する</li>
+                    <li>編集ボタンをクリックする</li>
+                    <li>商品名を更新する</li>
+                    <li>更新ボタンをクリックする</li>
+                </ol>
+            </td>
+        </tr>
+        <tr>
+            <th>期待結果</th>
+            <td>
+                <ul>
+                    <li>商品詳細ページにリダイレクトされること</li>
+                    <li>更新された商品名が表示されること</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <th>自動化ポイント</th>
+            <td>
+                <ul>
+                    <li>編集ボタンの特定: <code>page.waitForSelector("a.btn-primary:has-text('編集')", ...);</code></li>
+                    <li>更新前後の商品名を変数で保持して比較</li>
+                </ul>
+            </td>
+        </tr>
+    </table>
+    
+    <h3>3.4 商品検索テスト（testSearchProduct）</h3>
+    
+    <table>
+        <tr>
+            <th width="20%">テスト項目</th>
+            <td>商品検索機能確認</td>
+        </tr>
+        <tr>
+            <th>前提条件</th>
+            <td>ユーザーがログイン済みであること</td>
+        </tr>
+        <tr>
+            <th>テスト手順</th>
+            <td>
+                <ol>
+                    <li>検索用の特徴的な名前の商品を新規作成する</li>
+                    <li>商品一覧ページに移動する</li>
+                    <li>検索フォームに特徴的なキーワードを入力する</li>
+                    <li>検索ボタンをクリックする</li>
+                </ol>
+            </td>
+        </tr>
+        <tr>
+            <th>期待結果</th>
+            <td>
+                <ul>
+                    <li>検索結果ページにリダイレクトされること（URLにkeywordパラメータが含まれる）</li>
+                    <li>検索結果に作成した商品が表示されること</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <th>自動化ポイント</th>
+            <td>
+                <ul>
+                    <li>特徴的な商品名の生成: <code>String uniqueSearchName = "XYZ検索用商品" + System.currentTimeMillis() % 10000;</code></li>
+                    <li>検索結果の確認: <code>page.waitForSelector("td:has-text('" + uniqueSearchName + "')", ...);</code></li>
+                    <li>URL検証: <code>page.waitForURL("**/products?keyword=*", ...);</code></li>
+                </ul>
+            </td>
+        </tr>
+    </table>
+    
+    <h3>3.5 商品詳細表示テスト（testProductDetail）</h3>
+    
+    <table>
+        <tr>
+            <th width="20%">テスト項目</th>
+            <td>商品詳細表示機能確認</td>
+        </tr>
+        <tr>
+            <th>前提条件</th>
+            <td>ユーザーがログイン済みであること</td>
+        </tr>
+        <tr>
+            <th>テスト手順</th>
+            <td>
+                <ol>
+                    <li>詳細表示用の商品を新規作成する</li>
+                    <li>商品詳細ページにリダイレクトされるのを待つ</li>
+                    <li>ページタイトルが表示されるまで待機する</li>
+                </ol>
+            </td>
+        </tr>
+        <tr>
+            <th>期待結果</th>
+            <td>
+                <ul>
+                    <li>ページタイトルが「商品詳細」と表示されること</li>
+                    <li>作成した商品名が表示されていること</li>
+                    <li>商品説明が表示されていること</li>
+                    <li>基本情報セクションが表示されること</li>
+                    <li>在庫情報セクションが表示されること</li>
+                    <li>在庫数が正しく表示されていること</li>
+                    <li>編集ボタンが表示されること</li>
+                    <li>入出庫処理ボタンが表示されること</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <th>自動化ポイント</th>
+            <td>
+                <ul>
+                    <li>セクション見出しの確認: <code>page.isVisible("h5.card-title:has-text('基本情報')")</code></li>
+                    <li>在庫数の確認: <code>page.isVisible("span:has-text('25 個')")</code></li>
+                    <li>ボタンの確認: <code>page.isVisible("a:has-text('編集')")</code></li>
+                </ul>
+            </td>
+        </tr>
+    </table>
+    
+    <h2>4. テストデータ設計</h2>
+    
+    <p>各テストは独立して実行できるよう、テストデータを自動生成します。</p>
+    
+    <h3>4.1 商品データ生成方法</h3>
+    
+    <pre>
+// 一意の商品名生成（タイムスタンプ利用）
+String uniqueProductName = "テスト" + System.currentTimeMillis() % 10000;
+
+// 商品情報入力
+page.fill("input[name=name]", uniqueProductName);
+page.fill("input[name=price]", "100");
+page.fill("input[name=stockQuantity]", "10");
+</pre>
+    
+    <h2>5. テスト実装サンプル</h2>
+    
+    <p>以下は商品登録テストの実装サンプルです。</p>
+    
+    <pre>
+@Test
+public void testCreateProduct() {
+    // 商品登録ページにアクセス
+    page.navigate(baseUrl + "/products/new");
+    page.waitForLoadState();
+    
+    // フォームタイトルが表示されるまで待機
+    page.waitForSelector("h5.card-title", 
+                       new Page.WaitForSelectorOptions()
+                           .setState(WaitForSelectorState.VISIBLE)
+                           .setTimeout(5000));
+    
+    // フォームタイトルを確認
+    Locator title = page.locator("h5.card-title");
+    assertEquals("新規商品登録", title.textContent().trim());
+    
+    // 短めの一意の商品名
+    String uniqueProductName = "テスト" + System.currentTimeMillis() % 10000;
+    
+    // 最小限の情報だけ入力
+    page.fill("input[name=name]", uniqueProductName);
+    page.fill("input[name=price]", "100");
+    page.fill("input[name=stockQuantity]", "10");
+    
+    // カテゴリを選択（最初のオプション以外を選択）
+    Locator categorySelect = page.locator("select[name=categoryId]");
+    int optionsCount = categorySelect.locator("option").count();
+    if (optionsCount > 1) {
+        // 2番目のオプションを選択（インデックスは0から始まるため、1を指定）
+        categorySelect.selectOption(new SelectOption().setIndex(1));
+    }
+    
+    // 送信ボタンをクリック
+    page.click("button[type=submit]");
+    
+    // 商品詳細ページにリダイレクトされることを確認
+    page.waitForURL("**/products/*", new Page.WaitForURLOptions().setTimeout(5000));
+}
+</pre>
+    
+    <h2>6. テスト実行結果</h2>
+    
+    <p>テスト結果は <code>target/surefire-reports/</code> ディレクトリに出力されます。</p>
+    
+    <div class="important">
+        <p><strong>注意事項：</strong></p>
+        <ul>
+            <li>E2Eテストはアプリケーションの仕様変更に敏感です。UIの変更があった場合は、テストコードも同時に更新してください。</li>
+            <li>特にセレクタやテキスト検証部分は、HTMLやUIテキストの変更に伴って修正が必要になります。</li>
+        </ul>
+    </div>
+    
+    <h2>7. トラブルシューティング</h2>
+    
+    <h3>7.1 よくある問題と解決策</h3>
+    
+    <table>
+        <tr>
+            <th>問題</th>
+            <th>考えられる原因</th>
+            <th>解決策</th>
+        </tr>
+        <tr>
+            <td>セレクタタイムアウトエラー</td>
+            <td>要素が見つからない、またはページの読み込みが遅い</td>
+            <td>タイムアウト値を増やす、またはセレクタを見直す</td>
+        </tr>
+        <tr>
+            <td>アサーションエラー</td>
+            <td>期待値と実際の値が一致しない</td>
+            <td>UIの実際のテキストを確認し、期待値を更新する</td>
+        </tr>
+        <tr>
+            <td>テストデータの競合</td>
+            <td>テスト間でデータが干渉している</td>
+            <td>各テストでユニークなデータを生成する</td>
+        </tr>
+    </table>
+    
+    <h3>7.2 デバッグ方法</h3>
+    
+    <p>テスト実行中の問題を診断するには、以下の情報を確認してください：</p>
+    
+    <ul>
+        <li>コンソール出力</li>
+        <li>surefire-reportsディレクトリのレポート</li>
+        <li>各テストメソッドの<code>System.out.println()</code>によるデバッグメッセージ</li>
+    </ul>
+    
+    <pre>
+// デバッグ情報の出力例
+System.out.println("Current URL: " + page.url());
+System.out.println("Page content: " + page.content());
+</pre>
+</body>
+</html>
