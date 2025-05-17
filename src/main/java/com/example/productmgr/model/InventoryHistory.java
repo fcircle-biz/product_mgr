@@ -43,6 +43,9 @@ public class InventoryHistory {
     // 元のフィールドとの互換性のためのメソッド
     @Transient
     public String getType() {
+        if (quantityChange == null) {
+            return "";
+        }
         return quantityChange > 0 ? "入庫" : "出庫";
     }
     
@@ -54,12 +57,19 @@ public class InventoryHistory {
     
     @Transient
     public Integer getQuantity() {
+        if (quantityChange == null) {
+            return 0;
+        }
         return Math.abs(quantityChange);
     }
     
     @Transient
     public void setQuantity(Integer quantity) {
         // 入出庫タイプに基づいて値を設定
+        if (quantity == null) {
+            this.quantityChange = 0;
+            return;
+        }
         if (this.getType().equals("入庫")) {
             this.quantityChange = Math.abs(quantity);
         } else {
@@ -86,5 +96,33 @@ public class InventoryHistory {
         } else {
             throw new IllegalArgumentException("タイプは「入庫」または「出庫」のいずれかを指定してください");
         }
+    }
+    
+    // descriptionとの互換性
+    @Transient
+    private String description;
+    
+    @Transient
+    public String getDescription() {
+        return this.reason;
+    }
+    
+    @Transient
+    public void setDescription(String description) {
+        this.reason = description;
+    }
+    
+    // noteプロパティ（UIとの互換性）
+    @Transient
+    private String note;
+    
+    @Transient
+    public String getNote() {
+        return this.note;
+    }
+    
+    @Transient
+    public void setNote(String note) {
+        this.note = note;
     }
 }

@@ -1,17 +1,22 @@
-version: '3.8'
+# Docker Compose設定ファイル
 
 services:
   postgres:
-    image: postgres:15
+    build:
+      context: ./postgres
+      dockerfile: Dockerfile
     container_name: product-mgr-postgres
     ports:
-      - "5432:5432"
+      - "5433:5432"
     environment:
       POSTGRES_USER: productmgr
       POSTGRES_PASSWORD: productmgr
       POSTGRES_DB: productmgr
     volumes:
       - postgres-data:/var/lib/postgresql/data
+      - postgres-logs:/var/log/postgresql
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+    command: postgres -c config_file=/etc/postgresql/postgresql.conf
     networks:
       - product-mgr-network
     healthcheck:
@@ -24,6 +29,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        - SKIP_TESTS=true
     container_name: product-mgr-app
     ports:
       - "8080:8080"
@@ -36,6 +43,10 @@ services:
       SPRING_DATASOURCE_PASSWORD: productmgr
     networks:
       - product-mgr-network
+    volumes:
+      - ./src:/app/src
+      - ./target:/app/target
+      - maven-repo:/root/.m2
 
 networks:
   product-mgr-network:
@@ -43,3 +54,5 @@ networks:
 
 volumes:
   postgres-data:
+  postgres-logs:
+  maven-repo:

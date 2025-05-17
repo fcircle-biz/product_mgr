@@ -512,7 +512,6 @@ public class ReportController {
                         history.getType(),
                         history.getQuantity(),
                         history.getReason(),
-                        history.getNote(),
                         history.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
                 );
             }
@@ -566,8 +565,7 @@ public class ReportController {
                         productName,
                         history.getType(),
                         history.getQuantity(),
-                        history.getReason(),
-                        history.getNote()
+                        history.getReason()
                 );
             }
             
@@ -601,7 +599,7 @@ public class ReportController {
                 
                 csvPrinter.printRecord(
                         product.getId(),
-                        product.getCode(),
+                        product.getJanCode(),
                         product.getName(),
                         categoryName,
                         product.getStockQuantity(),
@@ -616,7 +614,7 @@ public class ReportController {
                 
                 csvPrinter.printRecord(
                         product.getId(),
-                        product.getCode(),
+                        product.getJanCode(),
                         product.getName(),
                         categoryName,
                         product.getStockQuantity(),

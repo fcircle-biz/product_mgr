@@ -143,13 +143,13 @@
         
         <h4 class="mb-3">クイックアクション</h4>
         <div class="quick-actions">
-            <a th:href="@{/products/create}" class="btn btn-primary">
+            <a th:href="@{/products/new}" class="btn btn-primary">
                 <i class="bi bi-plus-circle"></i> 商品登録
             </a>
-            <a th:href="@{/inventory/stock-in}" class="btn btn-success">
+            <a th:href="@{/inventory/add}" class="btn btn-success">
                 <i class="bi bi-arrow-down-circle"></i> 入庫登録
             </a>
-            <a th:href="@{/inventory/stock-out}" class="btn btn-danger">
+            <a th:href="@{/inventory/subtract}" class="btn btn-danger">
                 <i class="bi bi-arrow-up-circle"></i> 出庫登録
             </a>
             <a th:href="@{/reports/daily}" class="btn btn-info">
@@ -259,7 +259,7 @@
                         </div>
                         <h5 class="card-title">レポート</h5>
                         <p class="card-text">各種レポートと統計</p>
-                        <a th:href="@{/reports}" class="stretched-link"></a>
+                        <a th:href="@{/reports/dashboard}" class="stretched-link"></a>
                     </div>
                 </div>
             </div>

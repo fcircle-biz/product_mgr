@@ -1,19 +1,22 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="fragments/layout :: head('在庫一覧')">
+<head th:replace="~{fragments/layout :: head('在庫一覧')}">
     <meta charset="UTF-8">
     <title>在庫一覧</title>
 </head>
 
 <body>
-    <nav th:replace="fragments/layout :: navbar"></nav>
+    <nav th:replace="~{fragments/layout :: navbar}"></nav>
     
-    <div th:replace="fragments/layout :: messages"></div>
+    <div th:replace="~{fragments/layout :: messages}"></div>
     
-    <div th:replace="fragments/layout :: breadcrumb(${
-        {{'name': '在庫管理', 'url': '/inventory'}}
-    })"></div>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/}">メインメニュー</a></li>
+            <li class="breadcrumb-item active">在庫一覧</li>
+        </ol>
+    </nav>
     
     <div class="container mb-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
@@ -28,404 +31,40 @@
             </div>
         </div>
         
-        <div class="card mb-4">
-            <div class="card-header bg-light">
-                <h5 class="mb-0">検索条件</h5>
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">在庫一覧</h5>
             </div>
             <div class="card-body">
-                <form th:action="@{/inventory}" method="get" class="row g-3">
-                    <div class="col-md-4">
-                        <label for="keyword" class="form-label">キーワード</label>
-                        <input type="text" class="form-control" id="keyword" name="keyword" 
-                               th:value="${searchKeyword}" placeholder="商品名、コードなど">
-                    </div>
-                    <div class="col-md-4">
-                        <label for="categoryId" class="form-label">カテゴリ</label>
-                        <select class="form-select" id="categoryId" name="categoryId">
-                            <option value="">すべて</option>
-                            <!-- Todo: カテゴリ一覧の表示 -->
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <label for="stockStatus" class="form-label">在庫状況</label>
-                        <select class="form-select" id="stockStatus" name="stockStatus">
-                            <option value="">すべて</option>
-                            <option value="low_stock" th:selected="${selectedStockStatus == 'low_stock'}">在庫少</option>
-                            <option value="out_of_stock" th:selected="${selectedStockStatus == 'out_of_stock'}">在庫切れ</option>
-                        </select>
-                    </div>
-                    <div class="col-12">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-search"></i> 検索
-                        </button>
-                        <a th:href="@{/inventory}" class="btn btn-outline-secondary">
-                            <i class="bi bi-x-circle"></i> クリア
-                        </a>
-                    </div>
-                </form>
-            </div>
-        </div>
-        
-        <div class="card">
-            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">在庫一覧</h5>
-                <span class="badge bg-light text-dark" th:text="${'全 ' + products.size() + ' 件'}">全 0 件</span>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover table-striped mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>ID</th>
-                                <th>商品名</th>
-                                <th>JANコード</th>
-                                <th>カテゴリ</th>
-                                <th>単価</th>
-                                <th>在庫数</th>
-                                <th>単位</th>
-                                <th>状態</th>
-                                <th>アクション</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="product : ${products}">
-                                <td th:text="${product.id}">1</td>
-                                <td th:text="${product.name}">商品名</td>
-                                <td th:text="${product.janCode}">4901234567890</td>
-                                <td th:text="${product.category != null ? product.category.name : '未分類'}">カテゴリ名</td>
-                                <td th:text="${#numbers.formatInteger(product.price, 0, 'COMMA') + '円'}">1,000円</td>
-                                <td>
-                                    <span th:text="${product.stockQuantity + ' ' + product.stockUnit}" 
-                                          th:class="${product.stockQuantity == 0 ? 'badge bg-danger' : 
-                                                     (product.stockQuantity <= 10 ? 'badge bg-warning text-dark' : '')}">
-                                        10 個
-                                    </span>
-                                </td>
-                                <td th:text="${product.stockUnit}">個</td>
-                                <td>
-                                    <span th:text="${product.status}"
-                                          th:class="${product.status == '販売中' ? 'badge bg-success' : 
-                                                     (product.status == '入荷待ち' ? 'badge bg-warning text-dark' : 
-                                                     (product.status == '販売終了' ? 'badge bg-secondary' : 'badge bg-info'))}">
-                                        販売中
-                                    </span>
-                                </td>
-                                <td>
-                                    <div class="dropdown">
-                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" 
-                                                data-bs-toggle="dropdown" aria-expanded="false">
-                                            操作
-                                        </button>
-                                        <ul class="dropdown-menu">
-                                            <li>
-                                                <a class="dropdown-item" th:href="@{/products/detail/{id}(id=${product.id})}">
-                                                    <i class="bi bi-info-circle"></i> 詳細
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a class="dropdown-item" th:href="@{/inventory/history/{id}(id=${product.id})}">
-                                                    <i class="bi bi-clock-history"></i> 履歴
-                                                </a>
-                                            </li>
-                                            <li><hr class="dropdown-divider"></li>
-                                            <li>
-                                                <a class="dropdown-item quick-in" href="#" th:data-product-id="${product.id}" 
-                                                   th:data-product-name="${product.name}">
-                                                    <i class="bi bi-plus-circle text-success"></i> クイック入庫
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a class="dropdown-item quick-out" href="#" th:data-product-id="${product.id}" 
-                                                   th:data-product-name="${product.name}"
-                                                   th:data-stock="${product.stockQuantity}">
-                                                    <i class="bi bi-dash-circle text-danger"></i> クイック出庫
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr th:if="${products.empty}">
-                                <td colspan="9" class="text-center py-4">データがありません</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>商品名</th>
+                            <th>在庫数</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="product : ${products}">
+                            <td th:text="${product.id}">1</td>
+                            <td th:text="${product.name}">サンプル商品</td>
+                            <td th:text="${product.stockQuantity}">10</td>
+                            <td>
+                                <a th:href="@{/inventory/history/{id}(id=${product.id})}" class="btn btn-sm btn-info">
+                                    履歴
+                                </a>
+                            </td>
+                        </tr>
+                        <tr th:if="${products.empty}">
+                            <td colspan="4" class="text-center">データがありません</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
     
-    <!-- クイック入庫モーダル -->
-    <div class="modal fade" id="quickInModal" tabindex="-1" aria-labelledby="quickInModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header bg-success text-white">
-                    <h5 class="modal-title" id="quickInModalLabel">クイック入庫</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div id="quickInError" class="alert alert-danger d-none"></div>
-                    <form id="quickInForm" class="needs-validation" novalidate>
-                        <input type="hidden" id="inProductId" name="productId">
-                        <div class="mb-3">
-                            <label class="form-label">商品名</label>
-                            <div id="inProductName" class="form-control-plaintext"></div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="inQuantity" class="form-label">数量 <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" id="inQuantity" name="quantity" required min="1">
-                            <div class="invalid-feedback">
-                                1以上の数値を入力してください
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="inReason" class="form-label">理由 <span class="text-danger">*</span></label>
-                            <select class="form-select" id="inReason" name="reason" required>
-                                <option value="">選択してください</option>
-                                <option value="通常入荷">通常入荷</option>
-                                <option value="返品">返品</option>
-                                <option value="棚卸調整">棚卸調整</option>
-                                <option value="その他">その他</option>
-                            </select>
-                            <div class="invalid-feedback">
-                                理由を選択してください
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="inNote" class="form-label">備考</label>
-                            <textarea class="form-control" id="inNote" name="note" rows="2"></textarea>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
-                    <button type="button" class="btn btn-success" id="quickInSave">
-                        <i class="bi bi-check-circle"></i> 入庫登録
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- クイック出庫モーダル -->
-    <div class="modal fade" id="quickOutModal" tabindex="-1" aria-labelledby="quickOutModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title" id="quickOutModalLabel">クイック出庫</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div id="quickOutError" class="alert alert-danger d-none"></div>
-                    <form id="quickOutForm" class="needs-validation" novalidate>
-                        <input type="hidden" id="outProductId" name="productId">
-                        <div class="mb-3">
-                            <label class="form-label">商品名</label>
-                            <div id="outProductName" class="form-control-plaintext"></div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">現在庫数</label>
-                            <div id="outCurrentStock" class="form-control-plaintext"></div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="outQuantity" class="form-label">数量 <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" id="outQuantity" name="quantity" required min="1">
-                            <div class="invalid-feedback" id="outQuantityFeedback">
-                                1以上の数値を入力してください
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="outReason" class="form-label">理由 <span class="text-danger">*</span></label>
-                            <select class="form-select" id="outReason" name="reason" required>
-                                <option value="">選択してください</option>
-                                <option value="販売">販売</option>
-                                <option value="不良品">不良品</option>
-                                <option value="棚卸調整">棚卸調整</option>
-                                <option value="内部使用">内部使用</option>
-                                <option value="その他">その他</option>
-                            </select>
-                            <div class="invalid-feedback">
-                                理由を選択してください
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="outNote" class="form-label">備考</label>
-                            <textarea class="form-control" id="outNote" name="note" rows="2"></textarea>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
-                    <button type="button" class="btn btn-danger" id="quickOutSave">
-                        <i class="bi bi-check-circle"></i> 出庫登録
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <footer th:replace="fragments/layout :: footer"></footer>
-    
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // クイック入出庫フォームのバリデーション
-            const validateForm = (form) => {
-                if (!form.checkValidity()) {
-                    form.classList.add('was-validated');
-                    return false;
-                }
-                return true;
-            };
-            
-            // クイック入庫
-            const quickInModal = document.getElementById('quickInModal');
-            const quickInModalInstance = new bootstrap.Modal(quickInModal);
-            const quickInBtns = document.querySelectorAll('.quick-in');
-            const quickInForm = document.getElementById('quickInForm');
-            const quickInError = document.getElementById('quickInError');
-            
-            quickInBtns.forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const productId = this.getAttribute('data-product-id');
-                    const productName = this.getAttribute('data-product-name');
-                    
-                    document.getElementById('inProductId').value = productId;
-                    document.getElementById('inProductName').textContent = productName;
-                    document.getElementById('inQuantity').value = '';
-                    document.getElementById('inReason').value = '';
-                    document.getElementById('inNote').value = '';
-                    
-                    quickInForm.classList.remove('was-validated');
-                    quickInError.classList.add('d-none');
-                    
-                    quickInModalInstance.show();
-                });
-            });
-            
-            document.getElementById('quickInSave').addEventListener('click', function() {
-                if (!validateForm(quickInForm)) return;
-                
-                const productId = document.getElementById('inProductId').value;
-                const quantity = document.getElementById('inQuantity').value;
-                const reason = document.getElementById('inReason').value;
-                const note = document.getElementById('inNote').value;
-                
-                const data = {
-                    productId: Number(productId),
-                    type: '入庫',
-                    quantity: Number(quantity),
-                    reason: reason,
-                    note: note
-                };
-                
-                fetch('/inventory/quick-process', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]').getAttribute('content')
-                    },
-                    body: JSON.stringify(data)
-                })
-                .then(response => response.text())
-                .then(result => {
-                    if (result.startsWith('error:')) {
-                        quickInError.textContent = result.substring(7);
-                        quickInError.classList.remove('d-none');
-                    } else {
-                        quickInModalInstance.hide();
-                        window.location.reload();
-                    }
-                })
-                .catch(error => {
-                    quickInError.textContent = error.message || '予期せぬエラーが発生しました';
-                    quickInError.classList.remove('d-none');
-                });
-            });
-            
-            // クイック出庫
-            const quickOutModal = document.getElementById('quickOutModal');
-            const quickOutModalInstance = new bootstrap.Modal(quickOutModal);
-            const quickOutBtns = document.querySelectorAll('.quick-out');
-            const quickOutForm = document.getElementById('quickOutForm');
-            const quickOutError = document.getElementById('quickOutError');
-            
-            quickOutBtns.forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const productId = this.getAttribute('data-product-id');
-                    const productName = this.getAttribute('data-product-name');
-                    const stockQuantity = this.getAttribute('data-stock');
-                    
-                    document.getElementById('outProductId').value = productId;
-                    document.getElementById('outProductName').textContent = productName;
-                    document.getElementById('outCurrentStock').textContent = stockQuantity;
-                    document.getElementById('outQuantity').value = '';
-                    document.getElementById('outReason').value = '';
-                    document.getElementById('outNote').value = '';
-                    
-                    // 現在庫数の表示
-                    document.getElementById('outQuantity').setAttribute('max', stockQuantity);
-                    document.getElementById('outQuantityFeedback').textContent = `1以上${stockQuantity}以下の数値を入力してください`;
-                    
-                    quickOutForm.classList.remove('was-validated');
-                    quickOutError.classList.add('d-none');
-                    
-                    quickOutModalInstance.show();
-                });
-            });
-            
-            document.getElementById('quickOutSave').addEventListener('click', function() {
-                if (!validateForm(quickOutForm)) return;
-                
-                const productId = document.getElementById('outProductId').value;
-                const currentStock = Number(document.getElementById('outCurrentStock').textContent);
-                const quantity = Number(document.getElementById('outQuantity').value);
-                const reason = document.getElementById('outReason').value;
-                const note = document.getElementById('outNote').value;
-                
-                // 数量チェック
-                if (quantity > currentStock) {
-                    document.getElementById('outQuantityFeedback').textContent = '在庫数以下の数値を入力してください';
-                    document.getElementById('outQuantity').setCustomValidity('Invalid');
-                    quickOutForm.classList.add('was-validated');
-                    return;
-                } else {
-                    document.getElementById('outQuantity').setCustomValidity('');
-                }
-                
-                const data = {
-                    productId: Number(productId),
-                    type: '出庫',
-                    quantity: quantity,
-                    reason: reason,
-                    note: note
-                };
-                
-                fetch('/inventory/quick-process', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]').getAttribute('content')
-                    },
-                    body: JSON.stringify(data)
-                })
-                .then(response => response.text())
-                .then(result => {
-                    if (result.startsWith('error:')) {
-                        quickOutError.textContent = result.substring(7);
-                        quickOutError.classList.remove('d-none');
-                    } else {
-                        quickOutModalInstance.hide();
-                        window.location.reload();
-                    }
-                })
-                .catch(error => {
-                    quickOutError.textContent = error.message || '予期せぬエラーが発生しました';
-                    quickOutError.classList.remove('d-none');
-                });
-            });
-        });
-    </script>
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>
 </html>

@@ -1,19 +1,23 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="fragments/layout :: head('在庫履歴')">
+<head th:replace="~{fragments/layout :: head('在庫履歴')}">
     <meta charset="UTF-8">
     <title>在庫履歴</title>
 </head>
 
 <body>
-    <nav th:replace="fragments/layout :: navbar"></nav>
+    <nav th:replace="~{fragments/layout :: navbar}"></nav>
     
-    <div th:replace="fragments/layout :: messages"></div>
+    <div th:replace="~{fragments/layout :: messages}"></div>
     
-    <div th:replace="fragments/layout :: breadcrumb(${
-        {{'name': '在庫管理', 'url': '/inventory'}, {'name': '在庫履歴', 'url': '/inventory/history/' + product.id}}
-    })"></div>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/}">メインメニュー</a></li>
+            <li class="breadcrumb-item"><a th:href="@{/inventory}">在庫管理</a></li>
+            <li class="breadcrumb-item active">在庫履歴</li>
+        </ol>
+    </nav>
     
     <div class="container mb-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
@@ -98,7 +102,7 @@
         </div>
     </div>
     
-    <footer th:replace="fragments/layout :: footer"></footer>
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
     
     <!-- ApexCharts.js を読み込み -->
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>

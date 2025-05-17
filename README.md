@@ -130,7 +130,7 @@ product_mgr/
 │   │   ├── service/         # ビジネスロジック
 │   │   └── ProductMgrApplication.java
 │   └── resources/
-│       ├── db/migration/    # Flyway DBマイグレーション
+│       ├── db/              # データベース初期化スクリプト
 │       ├── static/          # 静的リソース
 │       ├── templates/       # Thymeleafテンプレート
 │       └── application.yml  # アプリケーション設定
@@ -140,6 +140,49 @@ product_mgr/
 ## ライセンス
 
 当プロジェクトはMITライセンスの下で提供されています。
+
+## テストの実行
+
+### 単体テスト
+```bash
+mvn test
+```
+
+### E2Eテスト
+
+E2Eテストは Playwright を使用し、実際のブラウザでアプリケーションを操作してテストを行います。
+
+#### 前提条件
+- Docker が実行されていること
+- Maven がインストールされていること
+
+#### 実行方法
+```bash
+# 全てのE2Eテストを実行
+./run-e2e-tests.sh
+
+# 特定のテストクラスのみ実行（例：認証関連テスト）
+POSTGRES_HOST=localhost POSTGRES_PORT=5434 POSTGRES_DB=productmgr_test POSTGRES_USER=testuser POSTGRES_PASSWORD=testpass mvn -DskipClean=true test -Dtest=com.example.productmgr.e2e.playwright.AuthPlaywrightTest
+
+# 特定のテストメソッドのみ実行（例：ログインテスト）
+POSTGRES_HOST=localhost POSTGRES_PORT=5434 POSTGRES_DB=productmgr_test POSTGRES_USER=testuser POSTGRES_PASSWORD=testpass mvn -DskipClean=true test -Dtest=com.example.productmgr.e2e.playwright.AuthPlaywrightTest#testSuccessfulLogin
+
+# CI環境でE2Eテストをスキップ
+CI=true mvn test
+```
+
+#### テスト結果の確認
+テスト結果は以下の場所に保存されます：
+```
+target/surefire-reports/
+```
+
+#### ヘッドレスモード
+デフォルトでE2Eテストはヘッドレスモードで実行されます。これにより、GUIのないサーバー環境でも実行可能です。
+
+#### トラブルシューティング
+- テストがタイムアウトする場合は、`BasePlaywrightTest.java`のタイムアウト設定を調整してください
+- データベース接続に問題がある場合は、PostgreSQLコンテナの状態を確認してください
 
 ## 貢献
 

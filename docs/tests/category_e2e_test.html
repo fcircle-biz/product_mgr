@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>カテゴリ管理 E2Eテスト仕様書</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #2980b9;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #3498db;
+            margin-top: 25px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        code {
+            background-color: #f8f8f8;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: Monaco, Consolas, 'Courier New', monospace;
+            color: #e74c3c;
+            font-size: 0.9em;
+        }
+        pre {
+            background-color: #f8f8f8;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            line-height: 1.4;
+        }
+        .note {
+            background-color: #ffffcc;
+            padding: 10px 15px;
+            border-left: 4px solid #ffcc00;
+            margin: 15px 0;
+        }
+        .important {
+            background-color: #ffe6e6;
+            padding: 10px 15px;
+            border-left: 4px solid #ff3333;
+            margin: 15px 0;
+        }
+        .diagram {
+            text-align: center;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>カテゴリ管理 E2Eテスト仕様書</h1>
+    
+    <p>本ドキュメントでは、商品管理システムにおけるカテゴリ管理機能のEnd-to-End（E2E）テスト仕様を定義します。</p>
+    
+    <h2>1. テスト概要</h2>
+    
+    <p>カテゴリ管理機能のE2Eテストでは、以下の機能が正常に動作することを確認します。</p>
+    
+    <ul>
+        <li>カテゴリ一覧の表示</li>
+        <li>カテゴリの新規登録</li>
+        <li>カテゴリ情報の編集</li>
+        <li>カテゴリの削除</li>
+    </ul>
+    
+    <h2>2. テスト環境</h2>
+    
+    <h3>2.1 必要環境</h3>
+    
+    <ul>
+        <li>Java 17以上</li>
+        <li>Maven 3.6以上</li>
+        <li>Docker および Docker Compose</li>
+        <li>Playwright（自動的にダウンロードされます）</li>
+    </ul>
+    
+    <h3>2.2 テスト実行方法</h3>
+    
+    <p>テストは以下のコマンドで実行できます：</p>
+    
+    <pre>
+./run-e2e-tests.sh
+</pre>
+    
+    <p>特定のテストクラスのみを実行する場合：</p>
+    
+    <pre>
+POSTGRES_HOST=localhost POSTGRES_PORT=5434 POSTGRES_DB=productmgr_test POSTGRES_USER=testuser POSTGRES_PASSWORD=testpass mvn -DskipClean=true test -Dtest=com.example.productmgr.e2e.playwright.CategoryPlaywrightTest
+</pre>
+    
+    <div class="note">
+        <p><strong>注意：</strong> テスト実行前にDockerが起動していることを確認してください。</p>
+    </div>
+    
+    <h2>3. テストケース</h2>
+    
+    <h3>3.1 カテゴリ一覧表示テスト（testCategoryList）</h3>
+    
+    <table>
+        <tr>
+            <th width="20%">テスト項目</th>
+            <td>カテゴリ一覧ページの表示確認</td>
+        </tr>
+        <tr>
+            <th>前提条件</th>
+            <td>ユーザーがログイン済みであること</td>
+        </tr>
+        <tr>
+            <th>テスト手順</th>
+            <td>
+                <ol>
+                    <li>カテゴリ一覧ページ（/categories）にアクセスする</li>
+                    <li>ページのロードが完了するまで待機する</li>
+                    <li>ページタイトルが表示されるまで待機する</li>
+                </ol>
+            </td>
+        </tr>
+        <tr>
+            <th>期待結果</th>
+            <td>
+                <ul>
+                    <li>ページタイトルが「カテゴリー一覧」と表示されること</li>
+                    <li>カテゴリテーブルが表示されること</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <th>自動化ポイント</th>
+            <td>
+                <ul>
+                    <li>セレクタ <code>.d-flex h2</code> でページタイトルを検証</li>
+                    <li><code>table</code> 要素の存在確認</li>
+                </ul>
+            </td>
+        </tr>
+    </table>
+    
+    <h3>3.2 カテゴリ新規登録テスト（testCreateCategory）</h3>
+    
+    <table>
+        <tr>
+            <th width="20%">テスト項目</th>
+            <td>新規カテゴリの登録機能確認</td>
+        </tr>
+        <tr>
+            <th>前提条件</th>
+            <td>ユーザーがログイン済みであること</td>
+        </tr>
+        <tr>
+            <th>テスト手順</th>
+            <td>
+                <ol>
+                    <li>カテゴリ作成ページ（/categories/new）にアクセスする</li>
+                    <li>フォームタイトルが表示されるまで待機する</li>
+                    <li>一意のカテゴリ名を生成する</li>
+                    <li>カテゴリ名と説明を入力する</li>
+                    <li>送信ボタンをクリックする</li>
+                </ol>
+            </td>
+        </tr>
+        <tr>
+            <th>期待結果</th>
+            <td>
+                <ul>
+                    <li>カテゴリ一覧ページにリダイレクトされること</li>
+                    <li>成功メッセージが表示されること</li>
+                    <li>作成したカテゴリが一覧に表示されること</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <th>自動化ポイント</th>
+            <td>
+                <ul>
+                    <li>一意のカテゴリ名生成: <code>String uniqueCategoryName = "テストカテゴリ" + System.currentTimeMillis() % 10000;</code></li>
+                    <li>フォーム入力: <code>page.fill("input[name=name]", uniqueCategoryName);</code></li>
+                    <li>作成カテゴリの確認: <code>page.waitForSelector("td:has-text('" + uniqueCategoryName + "')", ...);</code></li>
+                </ul>
+            </td>
+        </tr>
+    </table>
+    
+    <h3>3.3 カテゴリ編集テスト（testEditCategory）</h3>
+    
+    <table>
+        <tr>
+            <th width="20%">テスト項目</th>
+            <td>カテゴリ情報編集機能確認</td>
+        </tr>
+        <tr>
+            <th>前提条件</th>
+            <td>
+                <ul>
+                    <li>ユーザーがログイン済みであること</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <th>テスト手順</th>
+            <td>
+                <ol>
+                    <li>カテゴリ作成ページで新しいカテゴリを作成する（データ独立性確保）</li>
+                    <li>カテゴリ一覧ページに遷移したことを確認する</li>
+                    <li>作成したカテゴリの行を特定し、編集ボタンをクリックする</li>
+                    <li>カテゴリ名と説明を更新する</li>
+                    <li>更新ボタンをクリックする</li>
+                </ol>
+            </td>
+        </tr>
+        <tr>
+            <th>期待結果</th>
+            <td>
+                <ul>
+                    <li>カテゴリ一覧ページにリダイレクトされること</li>
+                    <li>成功メッセージが表示されること</li>
+                    <li>更新されたカテゴリ名が一覧に表示されること</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <th>自動化ポイント</th>
+            <td>
+                <ul>
+                    <li>編集ボタンの特定: <code>page.locator("tr:has-text('" + originalName + "') a[title='編集']").first().click();</code></li>
+                    <li>フォーム値の検証: <code>assertEquals(originalName, page.locator("input[name=name]").inputValue());</code></li>
+                    <li>更新カテゴリの確認: <code>page.waitForSelector("td:has-text('" + updatedName + "')", ...);</code></li>
+                </ul>
+            </td>
+        </tr>
+    </table>
+    
+    <h3>3.4 カテゴリ削除テスト（testDeleteCategory）</h3>
+    
+    <table>
+        <tr>
+            <th width="20%">テスト項目</th>
+            <td>カテゴリ削除機能確認</td>
+        </tr>
+        <tr>
+            <th>前提条件</th>
+            <td>ユーザーがログイン済みであること</td>
+        </tr>
+        <tr>
+            <th>テスト手順</th>
+            <td>
+                <ol>
+                    <li>カテゴリ作成ページで新しいカテゴリを作成する（データ独立性確保）</li>
+                    <li>カテゴリ一覧ページに遷移したことを確認する</li>
+                    <li>作成したカテゴリの行を特定し、削除ボタンをクリックする</li>
+                    <li>確認ダイアログで「OK」をクリックする</li>
+                </ol>
+            </td>
+        </tr>
+        <tr>
+            <th>期待結果</th>
+            <td>
+                <ul>
+                    <li>カテゴリ一覧ページが再読み込みされること</li>
+                    <li>成功メッセージが表示されること</li>
+                    <li>削除したカテゴリが一覧から消えていること</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <th>自動化ポイント</th>
+            <td>
+                <ul>
+                    <li>削除ボタンの特定: <code>page.locator("tr:has-text('" + categoryName + "') a[title='削除']").first().click();</code></li>
+                    <li>確認ダイアログ処理: <code>page.onDialog(dialog -> dialog.accept());</code></li>
+                    <li>削除確認: <code>assertFalse(page.locator("td:has-text('" + categoryName + "')").count() > 0);</code></li>
+                </ul>
+            </td>
+        </tr>
+    </table>
+    
+    <h2>4. フロー図</h2>
+    
+    <div class="diagram">
+        <h3>カテゴリCRUD操作のフロー</h3>
+        <pre>
++-------------------+    +------------------------+    +----------------------+
+| カテゴリ一覧表示   | -> | 新規カテゴリ作成       | -> | カテゴリ編集          |
++-------------------+    +------------------------+    +----------------------+
+         |                          |                           |
+         |                          v                           v
+         |                +------------------------+    +----------------------+
+         |                | 一覧ページへ戻る       | <- | 一覧ページへ戻る      |
+         |                +------------------------+    +----------------------+
+         v                          |                           
++-------------------+               |                           
+| カテゴリ削除      | <-------------+                           
++-------------------+                                           
+         |                                                      
+         v                                                      
++-------------------+                                           
+| 削除確認          |                                           
++-------------------+                                           
+        </pre>
+    </div>
+    
+    <h2>5. テストデータ設計</h2>
+    
+    <p>各テストは独立して実行できるよう、テストデータを自動生成します。</p>
+    
+    <h3>5.1 カテゴリデータ生成方法</h3>
+    
+    <pre>
+// 一意のカテゴリ名生成（タイムスタンプ利用）
+String uniqueCategoryName = "テストカテゴリ" + System.currentTimeMillis() % 10000;
+
+// カテゴリ情報入力
+page.fill("input[name=name]", uniqueCategoryName);
+page.fill("textarea[name=description]", "これはテスト用カテゴリの説明です。");
+</pre>
+    
+    <h2>6. テスト実装サンプル</h2>
+    
+    <p>以下はカテゴリ削除テストの実装サンプルです。</p>
+    
+    <pre>
+@Test
+public void testDeleteCategory() {
+    // まず削除するためのカテゴリを新規作成する
+    // カテゴリ作成ページにアクセス
+    page.navigate(baseUrl + "/categories/new");
+    page.waitForLoadState();
+    
+    // フォームタイトルが表示されるまで待機
+    page.waitForSelector("h5.card-title", 
+                      new Page.WaitForSelectorOptions()
+                          .setState(WaitForSelectorState.VISIBLE)
+                          .setTimeout(5000));
+    
+    // ユニークなカテゴリ名を生成
+    String categoryName = "削除用カテゴリ-" + System.currentTimeMillis() % 10000;
+    
+    // 最小限の情報を入力
+    page.fill("input[name=name]", categoryName);
+    page.fill("textarea[name=description]", "これは削除テスト用のカテゴリです。");
+    
+    // 送信ボタンをクリック
+    page.click("button[type=submit]");
+    
+    // カテゴリ一覧ページにリダイレクトされるのを待つ
+    page.waitForURL("**/categories", new Page.WaitForURLOptions().setTimeout(5000));
+    page.waitForLoadState();
+    
+    // 成功メッセージが表示されることを確認
+    page.waitForSelector(".alert-success", 
+                      new Page.WaitForSelectorOptions()
+                          .setState(WaitForSelectorState.VISIBLE)
+                          .setTimeout(5000));
+    
+    // 作成したカテゴリの行を見つける
+    page.waitForSelector("td:has-text('" + categoryName + "')", 
+                      new Page.WaitForSelectorOptions()
+                          .setState(WaitForSelectorState.VISIBLE)
+                          .setTimeout(5000));
+    
+    // ダイアログハンドラを設定（クリック前に設定することが重要）
+    page.onDialog(dialog -> dialog.accept());
+    
+    // 同じ行の削除ボタンをクリック
+    page.locator("tr:has-text('" + categoryName + "') a[title='削除']").first().click();
+    
+    // カテゴリ一覧ページを再読み込み
+    page.waitForLoadState();
+    
+    // 成功メッセージが表示されることを確認
+    page.waitForSelector(".alert-success", 
+                      new Page.WaitForSelectorOptions()
+                          .setState(WaitForSelectorState.VISIBLE)
+                          .setTimeout(5000));
+    
+    // 削除したカテゴリが一覧に表示されなくなったことを確認（数秒待機）
+    try {
+        Thread.sleep(2000); // 画面の更新を待つ
+    } catch (InterruptedException e) {
+        e.printStackTrace();
+    }
+    
+    // 削除したカテゴリを検索
+    boolean categoryExists = page.locator("td:has-text('" + categoryName + "')").count() > 0;
+    
+    // カテゴリが存在しないことを確認
+    assertFalse(categoryExists, "削除したはずのカテゴリが一覧に表示されています: " + categoryName);
+}
+</pre>
+    
+    <h2>7. テスト実行結果</h2>
+    
+    <p>テスト結果は <code>target/surefire-reports/</code> ディレクトリに出力されます。</p>
+    
+    <div class="important">
+        <p><strong>注意事項：</strong></p>
+        <ul>
+            <li>商品に関連付けられているカテゴリは削除できないため、必ず新しいカテゴリを作成してからテストします。</li>
+            <li>確認ダイアログの処理は、クリック前にハンドラを設定する必要があります。</li>
+        </ul>
+    </div>
+    
+    <h2>8. トラブルシューティング</h2>
+    
+    <h3>8.1 よくある問題と解決策</h3>
+    
+    <table>
+        <tr>
+            <th>問題</th>
+            <th>考えられる原因</th>
+            <th>解決策</th>
+        </tr>
+        <tr>
+            <td>ダイアログが操作できない</td>
+            <td>ダイアログハンドラの設定タイミングが不適切</td>
+            <td>クリック前にダイアログハンドラを設定する: <code>page.onDialog(dialog -> dialog.accept());</code></td>
+        </tr>
+        <tr>
+            <td>削除ボタンが見つからない</td>
+            <td>セレクタが不正確または要素構造が変更された</td>
+            <td>実際のHTML構造を確認し、セレクタを修正する</td>
+        </tr>
+        <tr>
+            <td>カテゴリ削除後も一覧に表示される</td>
+            <td>削除操作の完了前に検証している</td>
+            <td>短い待機時間を追加して画面更新を待つ</td>
+        </tr>
+    </table>
+    
+    <h3>8.2 デバッグ方法</h3>
+    
+    <p>カテゴリ関連のテスト問題を診断するには、以下の情報を確認してください：</p>
+    
+    <ul>
+        <li>カテゴリ一覧テーブルのHTML構造</li>
+        <li>実際に表示されているボタンのタイトル属性値</li>
+        <li>確認ダイアログの発生と処理状況</li>
+    </ul>
+    
+    <pre>
+// カテゴリ一覧テーブルのデバッグ
+System.out.println("テーブル行数: " + page.locator("table tbody tr").count());
+System.out.println("削除ボタン数: " + page.locator("a[title='削除']").count());
+System.out.println("対象カテゴリ表示確認: " + page.locator("td:has-text('" + categoryName + "')").count());
+</pre>
+    
+    <h2>9. まとめ</h2>
+    
+    <p>カテゴリ管理機能のE2Eテストでは、カテゴリのCRUD操作（作成・読み取り・更新・削除）が正常に機能することを確認します。
+    各テストは独立して実行できるように設計され、テストデータを自動生成することで再現性を確保しています。</p>
+    
+    <p>特に削除操作では、確認ダイアログの処理が重要なポイントとなります。クリック前にダイアログハンドラを設定することで、
+    自動テストでもダイアログの操作を確実に行うことができます。</p>
+    
+</body>
+</html>

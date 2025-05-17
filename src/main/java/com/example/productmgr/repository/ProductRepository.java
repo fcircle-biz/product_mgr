@@ -61,4 +61,7 @@ public interface ProductRepository extends CrudRepository<Product, Long> {
     List<Product> findLowStock();
     
     boolean existsByJanCode(String janCode);
+    
+    @Query("SELECT COUNT(*) FROM products")
+    int countAllProducts();
 }

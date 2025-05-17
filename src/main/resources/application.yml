@@ -2,13 +2,13 @@ spring:
   application:
     name: product-mgr
   datasource:
-    url: jdbc:postgresql://localhost:5432/productmgr
+    url: jdbc:postgresql://localhost:5433/productmgr
     username: productmgr
     password: productmgr
     driver-class-name: org.postgresql.Driver
-  flyway:
-    enabled: true
-    baseline-on-migrate: true
+  sql:
+    init:
+      mode: never  # 手動でSQLを実行する場合
   data:
     jdbc:
       repositories:

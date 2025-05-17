@@ -73,10 +73,15 @@ public class ProductService {
             }
             
             product.setCreatedAt(existingProduct.getCreatedAt());
+            product.setStockQuantity(existingProduct.getStockQuantity()); // 在庫数量を保持
             product.setUpdatedAt(LocalDateTime.now());
+            
         }
         
-        return productRepository.save(product);
+        Product savedProduct = productRepository.save(product);
+        
+        
+        return savedProduct;
     }
     
     @Transactional
@@ -86,5 +91,9 @@ public class ProductService {
     
     public boolean existsById(Long id) {
         return productRepository.existsById(id);
+    }
+    
+    public ProductRepository getRepository() {
+        return productRepository;
     }
 }

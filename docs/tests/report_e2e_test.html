@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>レポート機能 E2Eテスト仕様書</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #2980b9;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #3498db;
+            margin-top: 25px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        code {
+            background-color: #f8f8f8;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: Monaco, Consolas, 'Courier New', monospace;
+            color: #e74c3c;
+            font-size: 0.9em;
+        }
+        pre {
+            background-color: #f8f8f8;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            line-height: 1.4;
+        }
+        .note {
+            background-color: #ffffcc;
+            padding: 10px 15px;
+            border-left: 4px solid #ffcc00;
+            margin: 15px 0;
+        }
+        .important {
+            background-color: #ffe6e6;
+            padding: 10px 15px;
+            border-left: 4px solid #ff3333;
+            margin: 15px 0;
+        }
+        .diagram {
+            text-align: center;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>レポート機能 E2Eテスト仕様書</h1>
+    
+    <p>本ドキュメントでは、商品管理システムにおけるレポート機能のEnd-to-End（E2E）テスト仕様を定義します。</p>
+    
+    <div class="note">
+        <p><strong>注意：</strong> レポート機能のテストでは、レポートの表示だけでなく、認証状態に応じたアクセス制御も重要なテスト対象です。</p>
+    </div>
+    
+    <h2>1. テスト概要</h2>
+    
+    <p>レポート機能のE2Eテストでは、以下の機能が正常に動作することを確認します。</p>
+    
+    <ul>
+        <li>レポートページへのアクセス制御</li>
+        <li>各種レポートページの表示・動作</li>
+        <li>レポートデータの表示・エクスポート機能</li>
+    </ul>
+    
+    <h2>2. テスト環境</h2>
+    
+    <h3>2.1 前提条件</h3>
+    
+    <ul>
+        <li>Java 17以上</li>
+        <li>Maven 3.6以上</li>
+        <li>Docker および Docker Compose</li>
+        <li>Playwright（自動的にダウンロードされます）</li>
+    </ul>
+    
+    <h3>2.2 テストデータ</h3>
+    
+    <p>テスト実行時には以下のデータが自動的に作成されています：</p>
+    
+    <ul>
+        <li>商品データ（複数のカテゴリを含む）</li>
+        <li>在庫履歴データ（入出庫履歴）</li>
+        <li>認証用ユーザーアカウント</li>
+    </ul>
+    
+    <h3>2.3 テスト実行方法</h3>
+    
+    <p>全テストを実行する場合：</p>
+    
+    <pre>./run-e2e-tests.sh</pre>
+    
+    <p>レポート機能のテストのみを実行する場合：</p>
+    
+    <pre>./run-single-e2e-test.sh ReportPlaywrightTest</pre>
+    
+    <p>特定のテストメソッドのみを実行する場合：</p>
+    
+    <pre>./run-single-e2e-test.sh ReportPlaywrightTest#testReportAccess</pre>
+    
+    <h2>3. テストケース</h2>
+    
+    <h3>3.1 レポートアクセス制御テスト（testReportAccess）</h3>
+    
+    <table>
+        <tr>
+            <th width="20%">テスト項目</th>
+            <td>レポートページへのアクセス制御確認</td>
+        </tr>
+        <tr>
+            <th>前提条件</th>
+            <td>テスト用アカウントが使用可能であること</td>
+        </tr>
+        <tr>
+            <th>テスト手順</th>
+            <td>
+                <ol>
+                    <li>管理者ユーザーでログインする</li>
+                    <li>レポートダッシュボード（/reports）に移動する</li>
+                    <li>ページが正しく表示されることを確認する</li>
+                    <li>ログアウトする</li>
+                    <li>未ログイン状態でレポートダッシュボードにアクセスを試みる</li>
+                </ol>
+            </td>
+        </tr>
+        <tr>
+            <th>期待結果</th>
+            <td>
+                <ul>
+                    <li>ログイン状態ではレポートページが正常に表示される</li>
+                    <li>未ログイン状態ではログインページにリダイレクトされる</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <th>自動化ポイント</th>
+            <td>
+                <ul>
+                    <li>URL確認: <code>assertTrue(page.url().contains("/reports"), "レポートページに正しく移動していること");</code></li>
+                    <li>コンテンツ確認: <code>assertTrue(page.isVisible("div.container"), "コンテナが表示されていること");</code></li>
+                    <li>リダイレクト確認: <code>assertTrue(page.url().contains("/login"), "認証なしのアクセスは認証ページへリダイレクトされること");</code></li>
+                </ul>
+            </td>
+        </tr>
+    </table>
+    
+    <h3>3.2 各種レポートページアクセステスト（testAllReportPagesAccess）</h3>
+    
+    <table>
+        <tr>
+            <th width="20%">テスト項目</th>
+            <td>各レポートページへのアクセス確認</td>
+        </tr>
+        <tr>
+            <th>前提条件</th>
+            <td>ユーザーがログイン済みであること</td>
+        </tr>
+        <tr>
+            <th>テスト手順</th>
+            <td>
+                <ol>
+                    <li>管理者ユーザーでログインする</li>
+                    <li>以下のレポートページにそれぞれアクセスする:
+                        <ul>
+                            <li>在庫警告レポート（/reports/stock-warning）</li>
+                            <li>在庫サマリーレポート（/reports/inventory-summary）</li>
+                            <li>カテゴリ分布レポート（/reports/category-distribution）</li>
+                            <li>在庫回転率レポート（/reports/inventory-turnover）</li>
+                            <li>日次レポート（/reports/daily）</li>
+                            <li>月次レポート（/reports/monthly）</li>
+                        </ul>
+                    </li>
+                    <li>各ページが正しく表示されることを確認する</li>
+                </ol>
+            </td>
+        </tr>
+        <tr>
+            <th>期待結果</th>
+            <td>
+                <ul>
+                    <li>各レポートページに正常にアクセスでき、リダイレクトが発生しないこと</li>
+                    <li>ページ内容が正しく表示されること</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <th>自動化ポイント</th>
+            <td>
+                <ul>
+                    <li>各ページへの順次アクセス: <code>for (String path : reportPaths) { page.navigate(baseUrl + path); }</code></li>
+                    <li>URL確認: <code>assertTrue(page.url().contains(path), path + "ページに正しく移動していること");</code></li>
+                    <li>リダイレクト非発生確認: <code>assertFalse(page.url().contains("/login"), "ログインページにリダイレクトされていないこと");</code></li>
+                </ul>
+            </td>
+        </tr>
+    </table>
+    
+    <h2>4. テスト実装</h2>
+    
+    <p>以下は、レポート機能のE2Eテスト実装例です：</p>
+    
+    <pre>
+public class ReportPlaywrightTest extends BasePlaywrightTest {
+
+    @Test
+    public void testReportAccess() {
+        // ログイン
+        login();
+        
+        // レポートダッシュボードに移動
+        page.navigate(baseUrl + "/reports");
+        page.waitForLoadState();
+        
+        // URLが正しいことを確認
+        assertTrue(page.url().contains("/reports"), "レポートページに正しく移動していること");
+        
+        // ログアウト
+        logout();
+        
+        // コンテキストを閉じて新しいコンテキストとページを作成（完全にセッションをクリア）
+        context.close();
+        context = browser.newContext();
+        page = context.newPage();
+        
+        // 認証なしでアクセスすると、ログインページにリダイレクトされることを確認
+        page.navigate(baseUrl + "/reports");
+        page.waitForLoadState();
+        
+        // リダイレクト先がログイン画面であることを確認
+        assertTrue(page.url().contains("/login"), "認証なしのアクセスは認証ページへリダイレクトされること");
+    }
+    
+    @Test
+    public void testAllReportPagesAccess() {
+        // ログイン
+        login();
+        
+        // 各レポートページに移動し、アクセスできることを確認
+        String[] reportPaths = {
+            "/reports/stock-warning",
+            "/reports/inventory-summary",
+            "/reports/category-distribution",
+            "/reports/inventory-turnover",
+            "/reports/daily",
+            "/reports/monthly"
+        };
+        
+        for (String path : reportPaths) {
+            // ページに移動
+            page.navigate(baseUrl + path);
+            page.waitForLoadState();
+            
+            // URLが正しいことを確認
+            assertTrue(page.url().contains(path), path + "ページに正しく移動していること");
+            
+            // HTTPステータスコードが200であることを確認（リダイレクトされていないこと）
+            assertFalse(page.url().contains("/login"), "ログインページにリダイレクトされていないこと");
+        }
+    }
+}</pre>
+    
+    <h2>5. フロー図</h2>
+    
+    <div class="diagram">
+        <h3>レポートアクセステストのフロー</h3>
+        <pre>
++-------------------+    +------------------------+    +----------------------+
+| ログイン           | -> | レポートページアクセス   | -> | ページ表示確認        |
++-------------------+    +------------------------+    +----------------------+
+                                                                |
+                                                                v
++-------------------+    +------------------------+    +----------------------+
+| ログインページ確認   | <- | 未認証アクセス          | <- | ログアウト           |
++-------------------+    +------------------------+    +----------------------+
+        </pre>
+    </div>
+    
+    <h2>6. 注意事項</h2>
+    
+    <div class="important">
+        <p><strong>テスト実行時の注意点：</strong></p>
+        <ul>
+            <li>レポートテストは、データベースに十分なテストデータがあることを前提としています。データが不足している場合、一部のレポートが正しく表示されない可能性があります。</li>
+            <li>特に日付範囲を指定するレポート（日次・月次レポート）では、期間内のデータ有無によってテスト結果が異なる場合があります。</li>
+            <li>レポートのCSVエクスポート機能をテストする場合は、ダウンロードの監視と検証が必要です。</li>
+            <li>テスト環境では、実際の本番データとは異なるサンプルデータを使用するため、レポートの内容自体の検証は基本的な表示確認にとどめています。</li>
+        </ul>
+    </div>
+    
+    <h2>7. トラブルシューティング</h2>
+    
+    <h3>7.1 よくある問題と解決策</h3>
+    
+    <table>
+        <tr>
+            <th>問題</th>
+            <th>考えられる原因</th>
+            <th>解決策</th>
+        </tr>
+        <tr>
+            <td>レポートページのロードタイムアウト</td>
+            <td>データ集計に時間がかかっている</td>
+            <td>タイムアウト値を増やす: <code>page.setDefaultTimeout(90000);</code></td>
+        </tr>
+        <tr>
+            <td>レポート要素が見つからない</td>
+            <td>レポート画面のレイアウトが変更された</td>
+            <td>最新のHTML構造を確認し、セレクタを更新する</td>
+        </tr>
+        <tr>
+            <td>CSVエクスポートのダウンロードが検出されない</td>
+            <td>ダウンロード処理に時間がかかっている</td>
+            <td>ダウンロード待機時間を増やす: <code>page.waitForTimeout(10000);</code></td>
+        </tr>
+    </table>
+    
+    <h2>8. まとめ</h2>
+    
+    <p>レポート機能のE2Eテストでは、各種レポートページへのアクセスと表示を確認することで、レポーティング機能全体の動作を検証しています。特に認証状態に応じたアクセス制御の検証は、システムのセキュリティ確保において重要です。</p>
+    
+    <p>また、将来的な拡張として、レポートデータの内容検証やエクスポート機能の詳細なテストを追加することが検討されています。</p>
+    
+    <p><a href="index.html">テスト仕様書目次に戻る</a></p>
+</body>
+</html>

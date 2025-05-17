@@ -94,8 +94,7 @@ public class ProductController {
                 history.setProductId(savedProduct.getId());
                 history.setType("入庫");
                 history.setQuantity(product.getStockQuantity());
-                history.setReason("初期在庫");
-                history.setNote("初期登録");
+                history.setReason("初期在庫（初期登録）");
                 // TODO: 実際のユーザーIDを設定
                 history.setUserId(1L);
                 
