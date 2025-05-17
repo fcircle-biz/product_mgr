@@ -57,12 +57,12 @@
 - [モックアップ一覧](mockups/README.md)  
   すべての画面モックアップを表示します。
 
-- [ログイン画面](mockups/login.md)
-- [メインメニュー](mockups/main_menu.md)
-- [商品一覧画面](mockups/product_list.md)
-- [商品詳細画面](mockups/product_detail.md)
-- [商品作成画面](mockups/product_create.md)
-- [在庫管理画面](mockups/inventory.md)
+- [ログイン画面](mockups/login.html)
+- [メインメニュー](mockups/main_menu.html)
+- [商品一覧画面](mockups/product_list.html)
+- [商品詳細画面](mockups/product_detail.html)
+- [商品作成画面](mockups/product_create.html)
+- [在庫管理画面](mockups/inventory.html)
 
 ## 実装ビュー
 
