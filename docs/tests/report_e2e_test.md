@@ -173,4 +173,4 @@ public class ReportPlaywrightTest extends BasePlaywrightTest {
 
 また、将来的な拡張として、レポートデータの内容検証やエクスポート機能の詳細なテストを追加することが検討されています。
 
-[テスト仕様書目次に戻る](index.md)
+[テスト仕様書目次に戻る](README.md)
