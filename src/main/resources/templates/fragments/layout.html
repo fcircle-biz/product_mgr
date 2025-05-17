@@ -28,7 +28,7 @@
 <body>
     <nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
-            <a class="navbar-brand" th:href="@{/}">商品管理システム</a>
+            <a class="navbar-brand" th:href="@{/}" th:text="${companyName} + ' 商品管理システム'">商品管理システム</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -70,7 +70,7 @@
                         <span class="nav-link text-light"><i class="bi bi-person-circle"></i> <span sec:authentication="name">ユーザー</span></span>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#" th:href="@{/logout}"><i class="bi bi-box-arrow-right"></i> ログアウト</a>
+                        <a class="nav-link" th:href="@{/logout}"><i class="bi bi-box-arrow-right"></i> ログアウト</a>
                     </li>
                 </ul>
             </div>
@@ -104,7 +104,7 @@
     <footer th:fragment="footer" class="container mt-5 mb-3">
         <hr>
         <div class="text-center">
-            <p class="text-muted">&copy; 2025 商品管理システム</p>
+            <p class="text-muted">&copy; 2025 <span th:text="${companyName}">商品管理システム</span></p>
         </div>
         
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
