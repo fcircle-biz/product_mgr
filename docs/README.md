@@ -54,7 +54,7 @@
 
 ## 画面モックアップ
 
-- [モックアップ一覧](mockups/index.md)  
+- [モックアップ一覧](mockups/README.md)  
   すべての画面モックアップを表示します。
 
 - [ログイン画面](mockups/login.md)
