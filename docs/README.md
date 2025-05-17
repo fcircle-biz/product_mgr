@@ -29,6 +29,9 @@
 - [画面遷移図 (Mermaid)](diagrams/screen_transition.md)  
   システムの画面遷移を図示しています。
 
+- [API エンドポイント設計書](diagrams/api_endpoints.md)  
+  システムのAPIエンドポイント一覧と機能を記述しています。
+
 ## シーケンス図
 
 - [商品作成フロー (Mermaid)](diagrams/sequence_product_create.md)  
