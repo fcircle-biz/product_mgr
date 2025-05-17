@@ -26,31 +26,31 @@
 
 ## システム設計図
 
-- [クラス図 (Draw.io)](diagrams/class_diagram.drawio)  
-  システムのクラス構造を図示しています。
+- [クラス図 (Mermaid)](diagrams/class_diagram.md)  
+  システムのクラス構造を図示しています。 ([Draw.io版](diagrams/class_diagram.drawio))
 
-- [クラス図 (日本語版, Draw.io)](diagrams/class_diagram_japanese.drawio)  
-  日本語表記のクラス図です。
+- [クラス図 (日本語版, Mermaid)](diagrams/class_diagram_japanese.md)  
+  日本語表記のクラス図です。 ([Draw.io版](diagrams/class_diagram_japanese.drawio))
 
-- [画面遷移図 (Draw.io)](diagrams/screen_transition.drawio)  
-  システムの画面遷移を図示しています。
+- [画面遷移図 (Mermaid)](diagrams/screen_transition.md)  
+  システムの画面遷移を図示しています。 ([Draw.io版](diagrams/screen_transition.drawio))
 
 ## シーケンス図
 
-- [商品作成フロー (Draw.io)](diagrams/sequence_product_create.drawio)  
-  商品作成時の処理フローを示しています。
+- [商品作成フロー (Mermaid)](diagrams/sequence_product_create.md)  
+  商品作成時の処理フローを示しています。 ([Draw.io版](diagrams/sequence_product_create.drawio))
 
-- [商品一覧表示フロー (Draw.io)](diagrams/sequence_product_list.drawio)  
-  商品一覧表示時の処理フローを示しています。
+- [商品一覧表示フロー (Mermaid)](diagrams/sequence_product_list.md)  
+  商品一覧表示時の処理フローを示しています。 ([Draw.io版](diagrams/sequence_product_list.drawio))
 
-- [商品更新フロー (Draw.io)](diagrams/sequence_product_update.drawio)  
-  商品情報更新時の処理フローを示しています。
+- [商品更新フロー (Mermaid)](diagrams/sequence_product_update.md)  
+  商品情報更新時の処理フローを示しています。 ([Draw.io版](diagrams/sequence_product_update.drawio))
 
-- [在庫追加フロー (Draw.io)](diagrams/sequence_inventory_add.drawio)  
-  在庫追加処理のフローを示しています。
+- [在庫追加フロー (Mermaid)](diagrams/sequence_inventory_add.md)  
+  在庫追加処理のフローを示しています。 ([Draw.io版](diagrams/sequence_inventory_add.drawio))
 
-- [在庫減少フロー (Draw.io)](diagrams/sequence_inventory_subtract.drawio)  
-  在庫減少処理のフローを示しています。
+- [在庫減少フロー (Mermaid)](diagrams/sequence_inventory_subtract.md)  
+  在庫減少処理のフローを示しています。 ([Draw.io版](diagrams/sequence_inventory_subtract.drawio))
 
 ## 画面モックアップ
 
