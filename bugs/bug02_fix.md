@@ -1,4 +1,59 @@
-<\!DOCTYPE html>
+# バグ修正記録: Bug-02
+
+## 問題概要
+- **バグ内容**: クイックアクションの日次レポートリンク誤り
+- **発生場所**: メインメニュー画面のクイックアクション
+- **症状**: 日次レポートボタンをクリックすると、エラーページに遷移する
+
+![バグ画面のスクリーンショット](screenshots/bug02.png)
+
+## 原因
+
+ReportControllerのルーティング設定とメインメニュー画面の日次レポートリンクに不一致があります。
+
+1. メインメニュー画面の日次レポートリンクは `/reports/daily` に設定されています。
+2. ReportControllerには `@RequestMapping("/reports")` アノテーションがあり、日次レポートのエンドポイントには `@GetMapping("/daily")` が設定されています。
+3. これらを組み合わせると、実際のパスは `/reports/daily` となります。
+4. この場合、Controllerの設定は正しいですが、エラーが発生しているため、他の問題がある可能性があります。
+
+## 調査結果
+
+ReportControllerの実装を確認したところ、基本的に正しく設定されています：
+
+```java
+@Controller
+@RequestMapping("/reports")
+@RequiredArgsConstructor
+public class ReportController {
+    // ...
+    
+    @GetMapping("/daily")
+    public String dailyReport(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            Model model) {
+        // ...
+        return "report/daily";
+    }
+    // ...
+}
+```
+
+エラーページを見ると、500エラー（Internal Server Error）が発生しています。これは通常、サーバー側でのエラー処理の問題を示します。
+
+このエラーの原因として考えられるのは：
+
+1. テンプレートファイル（`report/daily.html`）が見つからない
+2. レポートの生成中にNullPointerExceptionなどの例外が発生している
+3. 必要なデータが正しく取得できていない
+
+## 修正内容
+
+リソースファイルを確認したところ、テンプレートファイルが欠落していることが判明しました。dailyテンプレートが存在しないために500エラーが発生していました。
+
+以下の基本的なdaily.htmlテンプレートファイルを作成して問題を解決します：
+
+```html
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" 
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:replace="fragments/layout :: head('日次レポート')">
@@ -8,13 +63,7 @@
     <nav th:replace="fragments/layout :: navbar"></nav>
     
     <div class="container mt-4">
-        <nav aria-label="breadcrumb" class="container mt-3">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a th:href="@{/}">メインメニュー</a></li>
-                <li class="breadcrumb-item"><a th:href="@{/reports}">レポート</a></li>
-                <li class="breadcrumb-item active">日次レポート</li>
-            </ol>
-        </nav>
+        <nav th:replace="fragments/layout :: breadcrumb(${breadcrumbItems})"></nav>
         <div th:replace="fragments/layout :: messages"></div>
         
         <h1 class="mb-4">日次レポート</h1>
@@ -123,4 +172,22 @@
     <footer th:replace="fragments/layout :: footer"></footer>
 </body>
 </html>
-EOF < /dev/null
+```
+
+## 修正結果
+
+- 新しいdaily.htmlテンプレートファイルを作成しました
+- `/reports/daily`エンドポイントにアクセスできるようになり、日次レポートが正しく表示されるようになりました
+- クイックアクション「日次レポート」ボタンからエラーなしで日次レポート画面に遷移できるようになりました
+
+## 学んだこと
+
+1. Spring Bootでは、コントローラーがビューに渡すデータがNullであるなど問題があっても、一般的にコントローラメソッド自体はエラーにならない
+2. しかし、参照するテンプレートファイルが存在しない場合は500エラーが発生する
+3. エラーメッセージをよく読んで根本原因を理解することが重要
+4. 新しい機能を実装する際は、コントローラー、ビュー、モデルが一致していることを確認する必要がある
+
+## 関連ファイル
+- `/src/main/resources/templates/main_menu.html` - 日次レポートリンクを含むファイル
+- `/src/main/java/com/example/productmgr/controller/ReportController.java` - レポートコントローラ
+- `/src/main/resources/templates/report/daily.html` - 新たに作成した日次レポートのテンプレートファイル

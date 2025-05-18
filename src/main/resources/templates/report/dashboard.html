@@ -1,269 +1,208 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-
-<head th:replace="~{fragments/layout :: head('レポートダッシュボード')}">
-    <meta charset="UTF-8">
-    <title>レポートダッシュボード</title>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="fragments/layout :: head('レポートダッシュボード')">
+    <title>レポートダッシュボード | 商品管理システム</title>
 </head>
-
 <body>
-    <nav th:replace="~{fragments/layout :: navbar}"></nav>
+    <nav th:replace="fragments/layout :: navbar"></nav>
     
-    <div th:replace="~{fragments/layout :: messages}"></div>
-    
-    <div th:replace="~{fragments/layout :: breadcrumb(${
-        {{'name': 'レポート', 'url': '/reports'}}
-    })"></div>
-    
-    <div class="container mb-5">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2>レポートダッシュボード</h2>
-        </div>
+    <div class="container mt-4">
+        <nav aria-label="breadcrumb" class="container mt-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/}">メインメニュー</a></li>
+                <li class="breadcrumb-item active">レポート</li>
+            </ol>
+        </nav>
+        <div th:replace="fragments/layout :: messages"></div>
         
-        <!-- レポートタイプ一覧 -->
-        <div class="row mb-4">
-            <div class="col-md-4">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body text-center">
-                        <i class="bi bi-calendar-day text-primary" style="font-size: 2.5rem;"></i>
-                        <h4 class="mt-3 mb-3">日次レポート</h4>
-                        <p class="text-muted">指定した日付の入出庫データを分析します。</p>
-                        <a th:href="@{/reports/daily}" class="btn btn-primary mt-2">表示</a>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-4">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body text-center">
-                        <i class="bi bi-calendar-month text-success" style="font-size: 2.5rem;"></i>
-                        <h4 class="mt-3 mb-3">月次レポート</h4>
-                        <p class="text-muted">指定した月の入出庫データを分析します。</p>
-                        <a th:href="@{/reports/monthly}" class="btn btn-success mt-2">表示</a>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-4">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body text-center">
-                        <i class="bi bi-arrow-repeat text-info" style="font-size: 2.5rem;"></i>
-                        <h4 class="mt-3 mb-3">在庫回転率</h4>
-                        <p class="text-muted">商品ごとの在庫回転率を分析します。</p>
-                        <a th:href="@{/reports/inventory-turnover}" class="btn btn-info mt-2">表示</a>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <h1 class="mb-4">レポートダッシュボード</h1>
         
         <div class="row mb-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="card stats-card border-primary">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="stats-icon text-primary me-3">
+                            <i class="bi bi-box-seam"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted">登録商品数</div>
+                            <h3 class="mb-0" th:text="${totalProducts}">0</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card stats-card border-warning">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="stats-icon text-warning me-3">
+                            <i class="bi bi-exclamation-triangle"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted">在庫少商品</div>
+                            <h3 class="mb-0" th:text="${lowStockCount}">0</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card stats-card border-danger">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="stats-icon text-danger me-3">
+                            <i class="bi bi-x-circle"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted">在庫切れ商品</div>
+                            <h3 class="mb-0" th:text="${outOfStockCount}">0</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">過去7日間の入出庫推移</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="transactionChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
             <div class="col-md-6">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body text-center">
-                        <i class="bi bi-exclamation-triangle text-warning" style="font-size: 2.5rem;"></i>
-                        <h4 class="mt-3 mb-3">在庫警告</h4>
-                        <p class="text-muted">在庫切れや在庫が少ない商品を確認します。</p>
-                        <a th:href="@{/reports/stock-warning}" class="btn btn-warning mt-2">表示</a>
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">レポート一覧</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group">
+                            <a th:href="@{/reports/daily}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="bi bi-file-text me-2"></i>
+                                    日次レポート
+                                </div>
+                                <span class="badge bg-primary rounded-pill">
+                                    <i class="bi bi-arrow-right"></i>
+                                </span>
+                            </a>
+                            <a th:href="@{/reports/monthly}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="bi bi-calendar-month me-2"></i>
+                                    月次レポート
+                                </div>
+                                <span class="badge bg-primary rounded-pill">
+                                    <i class="bi bi-arrow-right"></i>
+                                </span>
+                            </a>
+                            <a th:href="@{/reports/stock-warning}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="bi bi-exclamation-triangle me-2"></i>
+                                    在庫警告レポート
+                                </div>
+                                <span class="badge bg-warning rounded-pill" th:text="${lowStockCount + outOfStockCount}">0</span>
+                            </a>
+                            <a th:href="@{/reports/inventory-summary}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="bi bi-bar-chart me-2"></i>
+                                    在庫サマリーレポート
+                                </div>
+                                <span class="badge bg-primary rounded-pill">
+                                    <i class="bi bi-arrow-right"></i>
+                                </span>
+                            </a>
+                            <a th:href="@{/reports/category-distribution}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="bi bi-pie-chart me-2"></i>
+                                    カテゴリ分布レポート
+                                </div>
+                                <span class="badge bg-primary rounded-pill">
+                                    <i class="bi bi-arrow-right"></i>
+                                </span>
+                            </a>
+                            <a th:href="@{/reports/inventory-turnover}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="bi bi-arrow-repeat me-2"></i>
+                                    在庫回転率レポート
+                                </div>
+                                <span class="badge bg-primary rounded-pill">
+                                    <i class="bi bi-arrow-right"></i>
+                                </span>
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
             
             <div class="col-md-6">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body text-center">
-                        <i class="bi bi-pie-chart text-danger" style="font-size: 2.5rem;"></i>
-                        <h4 class="mt-3 mb-3">カテゴリ分布</h4>
-                        <p class="text-muted">カテゴリ別の商品数や在庫数を確認します。</p>
-                        <a th:href="@{/reports/category-distribution}" class="btn btn-danger mt-2">表示</a>
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">今日の取引</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-3">
+                            <div>
+                                <h5>入庫数</h5>
+                                <h3 class="text-success" th:text="${todayInbound}">0</h3>
+                            </div>
+                            <div>
+                                <h5>出庫数</h5>
+                                <h3 class="text-danger" th:text="${todayOutbound}">0</h3>
+                            </div>
+                        </div>
+                        <a th:href="@{/reports/daily}" class="btn btn-outline-primary">
+                            <i class="bi bi-file-text"></i> 詳細を見る
+                        </a>
                     </div>
                 </div>
-            </div>
-        </div>
-        
-        <!-- 在庫概要 -->
-        <div class="card mb-4 shadow-sm">
-            <div class="card-header bg-light">
-                <h5 class="mb-0">在庫概要</h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="card border-primary mb-3">
-                            <div class="card-body text-center">
-                                <h5 class="card-title text-primary">商品総数</h5>
-                                <p class="display-4" th:text="${totalProducts}">0</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card border-warning mb-3">
-                            <div class="card-body text-center">
-                                <h5 class="card-title text-warning">在庫少</h5>
-                                <p class="display-4" th:text="${lowStockCount}">0</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card border-danger mb-3">
-                            <div class="card-body text-center">
-                                <h5 class="card-title text-danger">在庫切れ</h5>
-                                <p class="display-4" th:text="${outOfStockCount}">0</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- 本日の取引サマリー -->
-        <div class="card mb-4 shadow-sm">
-            <div class="card-header bg-light">
-                <h5 class="mb-0">本日の取引サマリー</h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="card border-success mb-3">
-                            <div class="card-body text-center">
-                                <h5 class="card-title text-success">入庫数</h5>
-                                <p class="display-4" th:text="${todayInbound}">0</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="card border-danger mb-3">
-                            <div class="card-body text-center">
-                                <h5 class="card-title text-danger">出庫数</h5>
-                                <p class="display-4" th:text="${todayOutbound}">0</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="text-center mt-3">
-                    <a th:href="@{/reports/daily}" class="btn btn-primary">本日の詳細レポートを見る</a>
-                </div>
-            </div>
-        </div>
-        
-        <!-- 過去7日間の入出庫グラフ -->
-        <div class="card mb-4 shadow-sm">
-            <div class="card-header bg-light">
-                <h5 class="mb-0">過去7日間の入出庫推移</h5>
-            </div>
-            <div class="card-body">
-                <canvas id="weeklyChart" height="300"></canvas>
-            </div>
-        </div>
-        
-        <!-- カテゴリ別商品数 -->
-        <div class="card shadow-sm">
-            <div class="card-header bg-light">
-                <h5 class="mb-0">カテゴリ別商品数</h5>
-            </div>
-            <div class="card-body">
-                <canvas id="categoryChart" height="300"></canvas>
             </div>
         </div>
     </div>
     
-    <footer th:replace="~{fragments/layout :: footer}"></footer>
+    <footer th:replace="fragments/layout :: footer"></footer>
     
-    <!-- Chart.js の読み込み -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
     <script th:inline="javascript">
-        document.addEventListener('DOMContentLoaded', function () {
-            // 過去7日間の入出庫グラフ
-            const dateLabels = /*[[${dateLabels}]]*/ [];
-            const inboundData = /*[[${inboundData}]]*/ [];
-            const outboundData = /*[[${outboundData}]]*/ [];
-            
-            new Chart(document.getElementById('weeklyChart'), {
-                type: 'line',
-                data: {
-                    labels: dateLabels,
-                    datasets: [
-                        {
-                            label: '入庫数',
-                            data: inboundData,
-                            fill: false,
-                            borderColor: 'rgb(40, 167, 69)',
-                            tension: 0.1
-                        },
-                        {
-                            label: '出庫数',
-                            data: outboundData,
-                            fill: false,
-                            borderColor: 'rgb(220, 53, 69)',
-                            tension: 0.1
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: '過去7日間の入出庫推移'
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
+        /*<![CDATA[*/
+        const dateLabels = /*[[${dateLabels}]]*/ ['05/01', '05/02', '05/03', '05/04', '05/05', '05/06', '05/07'];
+        const inboundData = /*[[${inboundData}]]*/ [10, 15, 8, 12, 5, 20, 14];
+        const outboundData = /*[[${outboundData}]]*/ [8, 12, 6, 10, 4, 18, 12];
+        
+        const ctx = document.getElementById('transactionChart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: dateLabels,
+                datasets: [{
+                    label: '入庫',
+                    data: inboundData,
+                    backgroundColor: 'rgba(40, 167, 69, 0.2)',
+                    borderColor: 'rgba(40, 167, 69, 1)',
+                    borderWidth: 2,
+                    tension: 0.1
+                }, {
+                    label: '出庫',
+                    data: outboundData,
+                    backgroundColor: 'rgba(220, 53, 69, 0.2)',
+                    borderColor: 'rgba(220, 53, 69, 1)',
+                    borderWidth: 2,
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
                     }
                 }
-            });
-            
-            // カテゴリ別商品数グラフ
-            const categories = /*[[${categories}]]*/ [];
-            const categoryLabels = categories.map(c => c.name);
-            const categoryData = categories.map(c => {
-                let count = 0;
-                /*[[${products}]]*/.forEach(p => {
-                    if (p.categoryId === c.id) {
-                        count++;
-                    }
-                });
-                return count;
-            });
-            
-            const backgroundColors = [
-                'rgba(54, 162, 235, 0.6)',
-                'rgba(255, 99, 132, 0.6)',
-                'rgba(255, 206, 86, 0.6)',
-                'rgba(75, 192, 192, 0.6)',
-                'rgba(153, 102, 255, 0.6)',
-                'rgba(255, 159, 64, 0.6)',
-                'rgba(199, 199, 199, 0.6)',
-                'rgba(83, 102, 255, 0.6)',
-                'rgba(40, 167, 69, 0.6)',
-                'rgba(0, 123, 255, 0.6)'
-            ];
-            
-            new Chart(document.getElementById('categoryChart'), {
-                type: 'pie',
-                data: {
-                    labels: categoryLabels,
-                    datasets: [{
-                        data: categoryData,
-                        backgroundColor: backgroundColors.slice(0, categoryLabels.length)
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'カテゴリ別商品数'
-                        },
-                        legend: {
-                            position: 'right'
-                        }
-                    }
-                }
-            });
+            }
         });
+        /*]]>*/
     </script>
 </body>
 </html>
